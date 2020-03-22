@@ -1,20 +1,19 @@
 import * as React from 'react';
 
 interface IFieldProps {
+  cellSize: number;
   children: React.ReactChild;
   sizeX: number;
   sizeY: number;
 }
 
-const CELL_SIZE = 30;
-
-export default ({ children, sizeX, sizeY }: IFieldProps) => (
+export default ({ cellSize, children, sizeX, sizeY }: IFieldProps) => (
   <div
     className='field'
     style={{
-      width: `${sizeX * CELL_SIZE}px`,
-      height: `${sizeY * CELL_SIZE}px`,
-      backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
+      width: `${sizeX * cellSize}px`,
+      height: `${sizeY * cellSize}px`,
+      backgroundSize: `${cellSize}px ${cellSize}px`,
     }}
   >
     {children}

@@ -10,6 +10,23 @@ import Loading from 'components/Loading';
 import NotFound from 'components/NotFound';
 import { Content } from 'components/Grid';
 import Field from './Field';
+import Shape, { ICell } from './Shape';
+
+export const CELL_SIZE = 30;
+
+const shapeT: ICell = {
+  offsetDirection: { x: 0, y: 0 },
+  next: {
+    offsetDirection: { x: 1, y: 0 },
+    next: {
+      offsetDirection: { x: 0, y: -1 },
+      next: {
+        offsetDirection: { x: 1, y: 1 },
+        next: null
+      },
+    },
+  },
+};
 
 @observer
 export default class Game extends React.Component {
@@ -18,11 +35,12 @@ export default class Game extends React.Component {
   };
 
   render() {
+    const shape: ICell = { ...shapeT, offsetDirection: { x: 4, y: 5 } };
 
     return (
       <Content className='game'>
-        <Field sizeX={10} sizeY={20}>
-          <span/>
+        <Field cellSize={CELL_SIZE} sizeX={10} sizeY={20}>
+          <Shape cellSize={CELL_SIZE} rootCell={shape} />
         </Field>
       </Content>
     );
