@@ -1,0 +1,25 @@
+.page
+  page()
+  background-size cover
+  background-position center center
+  background-attachment fixed
+
+  &-manager
+  &-wrapper
+  &-content
+    page()
+
+  &--current
+  &--prev
+    height 100%
+    overflow hidden
+
+  &--last
+    position relative
+
+  &--theme
+    &-login
+      back(url(/img/images/login.jpg))
+
+    &-page404
+      back(url(/img/images/hole.jpg))

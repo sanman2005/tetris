@@ -1,0 +1,22 @@
+.vacancy-add
+  position relative
+  shadowInset()
+
+  &__form
+    max-height 0
+    overflow hidden
+    transition()
+
+  &__button
+    max-height 1000px
+    overflow hidden
+    transition()
+
+  &--form-show
+    & ^[0]__form
+      max-height 1000px
+      padding $columnPadding
+
+    & ^[0]__button
+      max-height 0
+      padding 0

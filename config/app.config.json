@@ -1,0 +1,18 @@
+{
+  "api": {
+    "host": {
+      "local": "http://127.0.0.1",
+      "development": "https://dev.api.to-be.dev",
+      "production": "https://api.team-maker.ru"
+    }
+  },
+  "social": {
+    "google": {
+      "clientId": "522849970514-33n7qjj9ql83hir70j27ecioqfsen972.apps.googleusercontent.com"
+    }
+  },
+  "ssr": {
+    "serverPort": 8080,
+    "serverStaticRoot": "/static"
+  }
+}

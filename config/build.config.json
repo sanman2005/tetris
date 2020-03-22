@@ -1,0 +1,9 @@
+{
+  "buildPath": "./build",
+
+  "devPath": "./dev",
+
+  "srcPath": "./src",
+
+  "ssr": false
+}
