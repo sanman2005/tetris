@@ -1,6 +1,6 @@
 {
-  "name": "Team-Maker",
-  "short_name": "Team-Maker",
+  "name": "Tetris",
+  "short_name": "Tetris",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#FAFAFA",
