@@ -22,6 +22,7 @@ import { random } from 'js/helpers';
 
 const CELL_SIZE = 30;
 const TIME_SHAPE_MOVE_MAX = 1;
+const TIME_KEY_HANDLER_DELAY = 0.05;
 
 interface IGameStats {
   rowsRemoved: number;
@@ -51,6 +52,8 @@ export default class Game extends React.Component<{}, IGameState> {
   };
 
   timeoutShapeMove: NodeJS.Timeout = null;
+
+  keyHandlersTimes: { [key: string]: number } = {};
 
   componentDidMount() {
     this.addNewShape();
@@ -235,9 +238,14 @@ export default class Game extends React.Component<{}, IGameState> {
       KeyS: this.moveDown,
       Space: this.rotate,
     };
+    const time = new Date().getTime();
+    const timeExpired =
+      !this.keyHandlersTimes[key] ||
+      time - this.keyHandlersTimes[key] >= TIME_KEY_HANDLER_DELAY * 1000;
 
-    if (keyHandlers[key]) {
+    if (keyHandlers[key] && timeExpired) {
       keyHandlers[key]();
+      this.keyHandlersTimes[key] = time;
     }
   };
 
