@@ -13,7 +13,7 @@ export default () => (
     <Container>
       <Row>
         <Column xs={6} className='footer__copyright'>
-          © TeamMaker, {year}
+          © Tetris, {year}
         </Column>
         <Column xs={6} className='footer__agreement'>
           {/*<Link to={pagesPath.terms}>{i18n`terms`}</Link>*/}

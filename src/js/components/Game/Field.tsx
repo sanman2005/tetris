@@ -1,21 +1,38 @@
 import * as React from 'react';
 
-interface IFieldProps {
-  cellSize: number;
-  children: React.ReactNode;
-  sizeX: number;
-  sizeY: number;
+import { IVector } from './Shape';
+import Cell from './Cell';
+
+export interface IField {
+  filledCells: { [key: string]: IVector};
+  size: IVector;
 }
 
-export default ({ cellSize, children, sizeX, sizeY }: IFieldProps) => (
+interface IFieldProps extends IField {
+  cellSize: number;
+  children: React.ReactNode;
+}
+
+export default ({ cellSize, children, filledCells, size }: IFieldProps) => (
   <div
     className='field'
     style={{
-      width: `${sizeX * cellSize}px`,
-      height: `${sizeY * cellSize}px`,
+      width: `${size.x * cellSize}px`,
+      height: `${size.y * cellSize}px`,
       backgroundSize: `${cellSize}px ${cellSize}px`,
     }}
   >
+    <div
+      className='field__cells'
+      style={{
+        width: `${cellSize}px`,
+        height: `${cellSize}px`,
+      }}
+    >
+      {Object.values(filledCells).map((cell, index) => (
+        <Cell offset={cell} key={index} />
+      ))}
+    </div>
     {children}
   </div>
 );

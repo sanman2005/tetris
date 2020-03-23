@@ -44,7 +44,7 @@ app.get('/*', async (req, res) => {
     }
 
     const response = Template(
-      'TeamMaker',
+      'Tetris',
       store,
       renderedContent,
       serverStaticRoot,

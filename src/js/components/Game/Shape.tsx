@@ -1,12 +1,10 @@
 import * as React from 'react';
 
+import Cell, { ICell } from './Cell';
+
 export interface IVector {
   x: number;
   y: number;
-}
-
-export interface ICell {
-  offset: IVector;
 }
 
 export interface IShape {
@@ -43,14 +41,6 @@ export default ({ cellSize, direction, position, cells }: IShapeProps) => (
       top: `${position.y * cellSize}px`,
     }}
   >
-    {cells.map(cell => (
-      <div
-        className='cell'
-        style={{
-          left: `${cell.offset.x * 100}%`,
-          top: `${cell.offset.y * 100}%`,
-        }}
-      />
-    ))}
+    {cells.map(cell => <Cell {...cell} />)}
   </div>
 );
