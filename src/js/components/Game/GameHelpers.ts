@@ -59,12 +59,11 @@ export const checkShapeFieldCellsPosition = (
   for (let i = 0; i < shape.cells.length; i++) {
     const cell = shape.cells[i];
     const cellPosition = {
-      x: shape.position.x + cell.offset.x,
-      y: shape.position.y + cell.offset.y,
+      x: position.x + cell.offset.x,
+      y: position.y + cell.offset.y,
     };
 
     if (fieldCells[getPositionKey(cellPosition)]) {
-      console.log(cellPosition, fieldCells);
       if (positionOld.y < position.y) {
         onStop();
       }

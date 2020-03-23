@@ -45,7 +45,7 @@ export default class Game extends React.Component<{}, IGameState> {
   timeoutShapeMove: NodeJS.Timeout = null;
 
   componentDidMount() {
-    this.setNewShape();
+    this.addNewShape();
     this.moveShapeOnTimer();
   }
 
@@ -58,7 +58,7 @@ export default class Game extends React.Component<{}, IGameState> {
     console.log('gameover');
   }
 
-  setNewShape() {
+  addNewShape() {
     const { field, gameShapes, shapeControlledIndex } = this.state;
     const shapesNew = [...gameShapes];
     const allShapes = Object.values(shapes);
@@ -110,7 +110,7 @@ export default class Game extends React.Component<{}, IGameState> {
       },
       () => {
         this.fillFieldCells(shape);
-        this.setNewShape();
+        this.addNewShape();
       },
     );
   };
