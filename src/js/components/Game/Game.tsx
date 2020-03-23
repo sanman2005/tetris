@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import { v4 as uuid } from 'uuid';
+import cn from 'classnames';
 
 import { ModelStatus } from 'models/index';
 import { pagesPath } from 'pages/index';
@@ -30,6 +31,7 @@ interface IGameStats {
 
 interface IGameState {
   field: IField;
+  gameOver: boolean;
   gameShapes: IShape[];
   shapeControlledIndex: number;
   stats: IGameStats;
@@ -43,6 +45,7 @@ export default class Game extends React.Component<{}, IGameState> {
       size: { x: 10, y: 20 },
       filledCells: {},
     },
+    gameOver: false,
     gameShapes: [null],
     shapeControlledIndex: 0,
     stats: {
@@ -56,21 +59,37 @@ export default class Game extends React.Component<{}, IGameState> {
   keyHandlersTimes: { [key: string]: number } = {};
 
   componentDidMount() {
-    this.addNewShape();
-    this.moveShapeOnTimer();
+   this.newGame();
   }
 
   componentWillUnmount() {
     clearTimeout(this.timeoutShapeMove);
   }
 
+  newGame = () => {
+    this.setState({
+      field: { ...this.state.field, filledCells: {} },
+      gameOver: false,
+      stats: {
+        rowsRemoved: 0,
+      },
+    });
+    this.addNewShape();
+    this.moveShapeOnTimer();
+  }
+
   gameover = () => {
     clearTimeout(this.timeoutShapeMove);
-    console.log('gameover');
+    this.setState({ gameOver: true });
   };
 
   addNewShape() {
-    const { field, gameShapes, shapeControlledIndex } = this.state;
+    const { field, gameOver, gameShapes, shapeControlledIndex } = this.state;
+
+    if (gameOver) {
+      return;
+    }
+
     const shapesNew = [...gameShapes];
     const allShapes = Object.values(shapes);
     const shape: IShape = {
@@ -120,6 +139,11 @@ export default class Game extends React.Component<{}, IGameState> {
         this.setState({ gameShapes: shapesNew });
       },
       () => {
+        if (shape.position.y <= 0) {
+          this.gameover();
+          return;
+        }
+
         this.fillFieldCells(shape);
         this.addNewShape();
       },
@@ -229,6 +253,7 @@ export default class Game extends React.Component<{}, IGameState> {
   };
 
   onKeyDown = (key: string) => {
+    const { gameOver } = this.state;
     const keyHandlers: { [key: string]: () => void } = {
       ArrowLeft: this.moveLeft,
       ArrowRight: this.moveRight,
@@ -243,17 +268,17 @@ export default class Game extends React.Component<{}, IGameState> {
       !this.keyHandlersTimes[key] ||
       time - this.keyHandlersTimes[key] >= TIME_KEY_HANDLER_DELAY * 1000;
 
-    if (keyHandlers[key] && timeExpired) {
+    if (!gameOver && keyHandlers[key] && timeExpired) {
       keyHandlers[key]();
       this.keyHandlersTimes[key] = time;
     }
   };
 
   render() {
-    const { field, gameShapes, stats } = this.state;
+    const { field, gameOver, gameShapes, stats } = this.state;
 
     return (
-      <Content className='game'>
+      <Content className={cn('game', { 'game--over': gameOver })}>
         <Control onKeyDown={this.onKeyDown} />
         <Field {...field} cellSize={CELL_SIZE}>
           {gameShapes.map(
@@ -264,6 +289,10 @@ export default class Game extends React.Component<{}, IGameState> {
         <div className='game__stats'>
           <div className='game__stats-label'>{i18n`rowsRemoved`}:</div>
           <div className='game__stats-value'>{stats.rowsRemoved}</div>
+        </div>
+        <div className='game__over'>
+          {i18n`gameOver`}
+          <Button text={i18n`newGame`} type='main' onClick={this.newGame} />
         </div>
       </Content>
     );
