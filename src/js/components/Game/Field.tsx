@@ -2,7 +2,7 @@ import * as React from 'react';
 
 interface IFieldProps {
   cellSize: number;
-  children: React.ReactChild;
+  children: React.ReactNode;
   sizeX: number;
   sizeY: number;
 }

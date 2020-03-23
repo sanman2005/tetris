@@ -1,37 +1,44 @@
 import * as React from 'react';
 
-interface IVector {
+export interface IVector {
   x: number;
   y: number;
 }
 
 export interface ICell {
-  offsetDirection: IVector;
-  next: ICell;
+  offset: IVector;
 }
 
-interface IShapeProps {
+export interface IShape {
+  direction: IVector;
+  position: IVector;
+  cells: ICell[];
+}
+
+export interface IShapeProps extends IShape {
   cellSize: number;
-  rootCell: ICell;
 }
 
-const Cell = ({ offsetDirection, next }: ICell) => (
+const Cell = ({ offset }: ICell) => (
   <div
     className='cell'
     style={{
-      left: `${offsetDirection.x * 100}%`,
-      top: `${offsetDirection.y * 100}%`,
+      left: `${offset.x * 100}%`,
+      top: `${offset.y * 100}%`,
     }}
-  >
-    {next && <Cell {...next} />}
-  </div>
+  />
 );
 
-export default ({ cellSize, rootCell }: IShapeProps) => (
+export default ({ cellSize, direction, position, cells }: IShapeProps) => (
   <div
     className='shape'
-    style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
+    style={{
+      width: `${cellSize}px`,
+      height: `${cellSize}px`,
+      left: `${position.x * cellSize}px`,
+      top: `${position.y * cellSize}px`,
+    }}
   >
-    <Cell {...rootCell} />
+    {cells.map(cell =>  <Cell {...cell} />)}
   </div>
 );
