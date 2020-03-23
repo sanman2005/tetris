@@ -186,7 +186,7 @@ export default class Game extends React.Component<{}, IGameState> {
 
     this.setState({
       field: { ...field, filledCells: newFilledCells },
-      stats: { ...stats, rowsRemoved: removedRowsCount },
+      stats: { ...stats, rowsRemoved: stats.rowsRemoved + removedRowsCount },
     });
   };
 
