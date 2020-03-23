@@ -6,12 +6,14 @@ import cn from 'classnames';
 import { ModelStatus } from 'models/index';
 import { pagesPath } from 'pages/index';
 import i18n from 'js/i18n';
+import { random } from 'js/helpers';
 
 import Button from 'components/Button';
 import Control from 'components/Control';
 import Loading from 'components/Loading';
 import NotFound from 'components/NotFound';
 import { Content } from 'components/Grid';
+
 import Field, { IField } from './Field';
 import Shape, { IShape, IVector, shapes } from './Shape';
 import {
@@ -19,7 +21,6 @@ import {
   getPositionKey,
   pointRotate,
 } from './GameHelpers';
-import { random } from 'js/helpers';
 
 const CELL_SIZE = 30;
 const TIME_SHAPE_MOVE_MAX = 1;
@@ -92,14 +93,18 @@ export default class Game extends React.Component<{}, IGameState> {
 
     const shapesNew = [...gameShapes];
     const allShapes = Object.values(shapes);
+    const randomShapeCells = [...allShapes[random(allShapes.length)]];
+    const randomAngle = random(4) * 90;
     const shape: IShape = {
       id: uuid(),
-      cells: allShapes[random(allShapes.length)],
+      cells: randomShapeCells.map(cell => ({
+        ...cell,
+        offset: pointRotate(cell.offset, randomAngle),
+      })),
       position: {
         x: random(field.size.x),
         y: 0,
       },
-      direction: { x: 1, y: 0 },
     };
 
     correctShapeFieldPosition(

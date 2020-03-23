@@ -10,7 +10,6 @@ export interface IVector {
 
 export interface IShape {
   id?: string;
-  direction?: IVector;
   position?: IVector;
   cells: ICell[];
 }
@@ -64,7 +63,7 @@ export const shapes: { [key: string]: ICell[] } = {
   ],
 };
 
-export default ({ cellSize, direction, position, cells }: IShapeProps) => (
+export default ({ cellSize, position, cells }: IShapeProps) => (
   <div
     className='shape'
     style={{
