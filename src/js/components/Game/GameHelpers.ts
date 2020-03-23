@@ -1,11 +1,13 @@
 import { IShape, IVector } from './Shape';
+import { IField } from './Field';
 
 export const correctShapeFieldPosition = (
   position: IVector,
-  fieldSize: IVector,
+  positionOld: IVector,
+  field: IField,
   shape: IShape,
   onSuccess: (position: IVector) => void,
-  onStop?: () => void,
+  onStop: () => void,
 ) => {
   const correctPosition = { ...position };
   const shapeLeftEdge = shape.cells.reduce(
@@ -23,20 +25,55 @@ export const correctShapeFieldPosition = (
 
   if (position.x + shapeLeftEdge < 0) {
     correctPosition.x -= position.x + shapeLeftEdge;
-  } else if (position.x + shapeRightEdge >= fieldSize.x) {
-    correctPosition.x -= position.x + shapeRightEdge - fieldSize.x + 1;
+  } else if (position.x + shapeRightEdge >= field.size.x) {
+    correctPosition.x -= position.x + shapeRightEdge - field.size.x + 1;
   }
 
-  if (position.y + shapeBottomEdge >= fieldSize.y) {
-    correctPosition.y -= position.y + shapeBottomEdge - fieldSize.y + 1;
+  if (position.y + shapeBottomEdge >= field.size.y) {
+    correctPosition.y -= position.y + shapeBottomEdge - field.size.y + 1;
+    onStop();
+    return;
+  }
 
-    if (onStop) {
-      onStop();
+  checkShapeFieldCellsPosition(
+    correctPosition,
+    positionOld,
+    field.filledCells,
+    shape,
+    () => onSuccess(correctPosition),
+    onStop,
+  );
+};
+
+export const getPositionKey = (position: IVector) =>
+  `${position.x}_${position.y}`;
+
+export const checkShapeFieldCellsPosition = (
+  position: IVector,
+  positionOld: IVector,
+  fieldCells: { [key: string]: IVector },
+  shape: IShape,
+  onSuccess: () => void,
+  onStop: () => void,
+) => {
+  for (let i = 0; i < shape.cells.length; i++) {
+    const cell = shape.cells[i];
+    const cellPosition = {
+      x: shape.position.x + cell.offset.x,
+      y: shape.position.y + cell.offset.y,
+    };
+
+    if (fieldCells[getPositionKey(cellPosition)]) {
+      console.log(cellPosition, fieldCells);
+      if (positionOld.y < position.y) {
+        onStop();
+      }
+
       return;
     }
   }
 
-  onSuccess(correctPosition);
+  onSuccess();
 };
 
 export const pointRotate = (vector: IVector, degrees: number) => {

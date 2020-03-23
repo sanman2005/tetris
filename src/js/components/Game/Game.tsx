@@ -13,7 +13,11 @@ import NotFound from 'components/NotFound';
 import { Content } from 'components/Grid';
 import Field, { IField } from './Field';
 import Shape, { IShape, IVector, shapes } from './Shape';
-import { correctShapeFieldPosition, pointRotate } from './GameHelpers';
+import {
+  correctShapeFieldPosition,
+  getPositionKey,
+  pointRotate,
+} from './GameHelpers';
 import { random } from 'js/helpers';
 
 const CELL_SIZE = 30;
@@ -60,16 +64,19 @@ export default class Game extends React.Component<{}, IGameState> {
     };
 
     randomShape.id = uuid();
+    randomShape.position = randomPosition;
 
     correctShapeFieldPosition(
       randomPosition,
-      field.size,
+      { x: randomPosition.x, y: -1 },
+      field,
       randomShape,
       position => {
         randomShape.position = position;
         shapesNew[shapeControlledIndex] = randomShape;
         this.setState({ gameShapes: shapesNew });
       },
+      () => console.log('gameover'),
     );
   }
 
@@ -81,10 +88,15 @@ export default class Game extends React.Component<{}, IGameState> {
     const { field, gameShapes, shapeControlledIndex } = this.state;
     const shapesNew = [...gameShapes];
     const shape = shapesNew[shapeControlledIndex];
+    const shapeNewPosition = {
+      x: shape.position.x + direction.x,
+      y: shape.position.y + direction.y,
+    };
 
     correctShapeFieldPosition(
-      { x: shape.position.x + direction.x, y: shape.position.y + direction.y },
-      field.size,
+      shapeNewPosition,
+      shape.position,
+      field,
       shape,
       position => {
         shape.position = position;
@@ -102,13 +114,12 @@ export default class Game extends React.Component<{}, IGameState> {
     const filledCells = { ...field.filledCells };
 
     shape.cells.forEach(cell => {
-      const cellX = shape.position.x + cell.offset.x;
-      const cellY = shape.position.y + cell.offset.y;
-
-      filledCells[`${cellX}_${cellY}`] = {
-        x: cellX,
-        y: cellY,
+      const cellPosition = {
+        x: shape.position.x + cell.offset.x,
+        y: shape.position.y + cell.offset.y,
       };
+
+      filledCells[getPositionKey(cellPosition)] = cellPosition;
     });
 
     this.setState({
@@ -136,11 +147,18 @@ export default class Game extends React.Component<{}, IGameState> {
       offset: pointRotate(cell.offset, angle),
     }));
 
-    correctShapeFieldPosition(shape.position, field.size, shape, position => {
-      shape.position = position;
-      shapesNew[shapeControlledIndex] = shape;
-      this.setState({ gameShapes: shapesNew });
-    });
+    correctShapeFieldPosition(
+      shape.position,
+      shape.position,
+      field,
+      shape,
+      position => {
+        shape.position = position;
+        shapesNew[shapeControlledIndex] = shape;
+        this.setState({ gameShapes: shapesNew });
+      },
+      () => {},
+    );
   };
 
   onKeyDown = (key: string) => {

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import Cell, { ICell } from './Cell';
+import { getPositionKey } from './GameHelpers';
 
 export interface IVector {
   x: number;
@@ -41,6 +42,6 @@ export default ({ cellSize, direction, position, cells }: IShapeProps) => (
       top: `${position.y * cellSize}px`,
     }}
   >
-    {cells.map(cell => <Cell {...cell} />)}
+    {cells.map(cell => <Cell {...cell} key={getPositionKey(cell.offset)}  />)}
   </div>
 );
