@@ -1,9 +1,11 @@
 import { IShape, IVector } from './Shape';
 
-export const getCorrectShapeFieldPosition = (
+export const correctShapeFieldPosition = (
   position: IVector,
   fieldSize: IVector,
   shape: IShape,
+  onSuccess: (position: IVector) => void,
+  onStop?: () => void,
 ) => {
   const correctPosition = { ...position };
   const shapeLeftEdge = shape.cells.reduce(
@@ -27,9 +29,14 @@ export const getCorrectShapeFieldPosition = (
 
   if (position.y + shapeBottomEdge >= fieldSize.y) {
     correctPosition.y -= position.y + shapeBottomEdge - fieldSize.y + 1;
+
+    if (onStop) {
+      onStop();
+      return;
+    }
   }
 
-  return correctPosition;
+  onSuccess(correctPosition);
 };
 
 export const pointRotate = (vector: IVector, degrees: number) => {

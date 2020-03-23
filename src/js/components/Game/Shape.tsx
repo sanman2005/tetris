@@ -10,6 +10,7 @@ export interface ICell {
 }
 
 export interface IShape {
+  id?: string;
   direction: IVector;
   position: IVector;
   cells: ICell[];
