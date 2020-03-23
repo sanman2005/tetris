@@ -23,10 +23,15 @@ import { random } from 'js/helpers';
 const CELL_SIZE = 30;
 const TIME_SHAPE_MOVE_MAX = 1;
 
+interface IGameStats {
+  rowsRemoved: number;
+}
+
 interface IGameState {
   field: IField;
   gameShapes: IShape[];
   shapeControlledIndex: number;
+  stats: IGameStats;
   timeShapeMove: number;
 }
 
@@ -39,6 +44,9 @@ export default class Game extends React.Component<{}, IGameState> {
     },
     gameShapes: [null],
     shapeControlledIndex: 0,
+    stats: {
+      rowsRemoved: 0,
+    },
     timeShapeMove: TIME_SHAPE_MOVE_MAX,
   };
 
@@ -56,7 +64,7 @@ export default class Game extends React.Component<{}, IGameState> {
   gameover = () => {
     clearTimeout(this.timeoutShapeMove);
     console.log('gameover');
-  }
+  };
 
   addNewShape() {
     const { field, gameShapes, shapeControlledIndex } = this.state;
@@ -128,13 +136,59 @@ export default class Game extends React.Component<{}, IGameState> {
       filledCells[getPositionKey(cellPosition)] = cellPosition;
     });
 
-    this.setState({
-      field: {
-        ...field,
-        filledCells,
+    this.setState(
+      {
+        field: {
+          ...field,
+          filledCells,
+        },
       },
-    });
+      this.removeFilledRows,
+    );
   }
+
+  removeFilledRows = () => {
+    const { field, stats } = this.state;
+    const { filledCells, size } = field;
+    const rowsFillCount: { [key: string]: number } = {};
+    let newFilledCells = { ...filledCells };
+    let removedRowsCount = 0;
+
+    Object.values(filledCells).forEach(
+      cell =>
+        cell && (rowsFillCount[cell.y] = 1 + (rowsFillCount[cell.y] || 0)),
+    );
+
+    const clearRow = (index: number) => {
+      const newFilledCellsCopy = newFilledCells;
+
+      newFilledCells = {};
+      removedRowsCount++;
+
+      Object.keys(newFilledCellsCopy).forEach(key => {
+        if (!newFilledCellsCopy[key] || newFilledCellsCopy[key].y > index) {
+          return;
+        }
+
+        if (newFilledCellsCopy[key].y < index) {
+          newFilledCellsCopy[key].y++;
+          newFilledCells[getPositionKey(newFilledCellsCopy[key])] =
+            newFilledCellsCopy[key];
+        }
+      });
+    };
+
+    Object.keys(rowsFillCount).forEach(row => {
+      if (rowsFillCount[row] === size.x) {
+        clearRow(+row);
+      }
+    });
+
+    this.setState({
+      field: { ...field, filledCells: newFilledCells },
+      stats: { ...stats, rowsRemoved: removedRowsCount },
+    });
+  };
 
   moveShapeOnTimer = () => {
     this.timeoutShapeMove = setTimeout(() => {
@@ -184,7 +238,7 @@ export default class Game extends React.Component<{}, IGameState> {
   };
 
   render() {
-    const { field, gameShapes } = this.state;
+    const { field, gameShapes, stats } = this.state;
 
     return (
       <Content className='game'>
@@ -195,6 +249,10 @@ export default class Game extends React.Component<{}, IGameState> {
               shape && <Shape key={shape.id} cellSize={CELL_SIZE} {...shape} />,
           )}
         </Field>
+        <div className='game__stats'>
+          <div className='game__stats-label'>{i18n`rowsRemoved`}:</div>
+          <div className='game__stats-value'>{stats.rowsRemoved}</div>
+        </div>
       </Content>
     );
   }

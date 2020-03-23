@@ -30,7 +30,7 @@ export default ({ cellSize, children, filledCells, size }: IFieldProps) => (
         height: `${cellSize}px`,
       }}
     >
-      {Object.values(filledCells).map((cell, index) => (
+      {Object.values(filledCells).map((cell, index) => cell && (
         <Cell offset={cell} key={getPositionKey(cell)} />
       ))}
     </div>

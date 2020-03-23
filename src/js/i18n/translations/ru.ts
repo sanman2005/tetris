@@ -58,6 +58,7 @@ export default {
   projectsEmpty: 'проектов пока нет',
   recoveryAccess: 'восстановление доступа',
   register: 'зарегистрироваться',
+  rowsRemoved: 'удалено строк',
   save: 'сохранить',
   signin: 'вход',
   signup: 'регистрация',

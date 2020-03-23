@@ -34,6 +34,7 @@ export default {
   projectNeed: 'the project is needed',
   projectsEmpty: 'no projects yet',
   recoveryAccess: 'access recovery',
+  rowsRemoved: 'rows removed',
   save: 'save',
   signin: 'sign in',
   signup: 'sign up',
