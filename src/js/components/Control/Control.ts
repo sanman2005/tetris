@@ -7,7 +7,7 @@ interface IControlProps {
 export default class Control extends React.Component<IControlProps> {
   onKeyDown = (event: { code: string }) => {
     this.props.onKeyDown(event.code);
-  };
+  }
 
   componentDidMount() {
     window.addEventListener('keydown', this.onKeyDown);

@@ -90,8 +90,10 @@ export default class Game extends React.Component<{}, IGameState> {
       Space: this.rotate,
     };
 
-    keyHandlers[key] && keyHandlers[key]();
-  };
+    if (keyHandlers[key]) {
+      keyHandlers[key]();
+    }
+  }
 
   render() {
     const { fieldSize, shapes } = this.state;

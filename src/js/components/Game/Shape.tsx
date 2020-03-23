@@ -19,16 +19,6 @@ export interface IShapeProps extends IShape {
   cellSize: number;
 }
 
-const Cell = ({ offset }: ICell) => (
-  <div
-    className='cell'
-    style={{
-      left: `${offset.x * 100}%`,
-      top: `${offset.y * 100}%`,
-    }}
-  />
-);
-
 export default ({ cellSize, direction, position, cells }: IShapeProps) => (
   <div
     className='shape'
@@ -39,6 +29,14 @@ export default ({ cellSize, direction, position, cells }: IShapeProps) => (
       top: `${position.y * cellSize}px`,
     }}
   >
-    {cells.map(cell =>  <Cell {...cell} />)}
+    {cells.map(cell => (
+      <div
+        className='cell'
+        style={{
+          left: `${cell.offset.x * 100}%`,
+          top: `${cell.offset.y * 100}%`,
+        }}
+      />
+    ))}
   </div>
 );
