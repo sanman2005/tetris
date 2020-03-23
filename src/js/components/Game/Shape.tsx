@@ -19,6 +19,19 @@ export interface IShapeProps extends IShape {
   cellSize: number;
 }
 
+export const shapes: { [key: string]: IShape } = {
+  T: {
+    direction: { x: 1, y: 0 },
+    position: { x: 0, y: 0 },
+    cells: [
+      { offset: { x: 0, y: 0 } },
+      { offset: { x: -1, y: 0 } },
+      { offset: { x: 0, y: -1 } },
+      { offset: { x: 1, y: 0 } },
+    ],
+  },
+};
+
 export default ({ cellSize, direction, position, cells }: IShapeProps) => (
   <div
     className='shape'

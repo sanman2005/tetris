@@ -10,6 +10,10 @@ export const namePattern = '^[\\sA-Za-zА-Яа-яЁё-]+$';
 export const passwordPattern = '^[^\\/"`\']+$';
 export const phonePattern = '(\\+7 \\(\\d{3}\\)\\s\\d{3}-\\d{2}-\\d{2}|\\d{11})';
 
+export const randomFloat = (max: number, min = 0) => min + Math.random() * (max - min);
+
+export const random = (max: number, min = 0) => Math.floor(randomFloat(min, max));
+
 export const getElementOffsetTop = (element: Element): number => {
   let offset = 0;
   let node: any = element;

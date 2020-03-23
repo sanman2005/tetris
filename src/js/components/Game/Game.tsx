@@ -11,43 +11,57 @@ import Loading from 'components/Loading';
 import NotFound from 'components/NotFound';
 import { Content } from 'components/Grid';
 import Field from './Field';
-import Shape, { IShape, IVector } from './Shape';
+import Shape, { IShape, IVector, shapes } from './Shape';
 import { getCorrectShapeFieldPosition, pointRotate } from './GameHelpers';
+import { random } from 'js/helpers';
 
 export const CELL_SIZE = 30;
 
-const shapeT: IShape = {
-  direction: { x: 1, y: 0 },
-  position: { x: 0, y: 0 },
-  cells: [
-    { offset: { x: 0, y: 0 } },
-    { offset: { x: -1, y: 0 } },
-    { offset: { x: 0, y: -1 } },
-    { offset: { x: 1, y: 0 } },
-  ],
-};
-
 interface IGameState {
   fieldSize: IVector;
-  shapes: IShape[];
+  gameShapes: IShape[];
   shapeControlledIndex: number;
 }
 
 @observer
 export default class Game extends React.Component<{}, IGameState> {
-  state = {
+  state: IGameState = {
     fieldSize: { x: 10, y: 20 },
-    shapes: [shapeT],
+    gameShapes: [null],
     shapeControlledIndex: 0,
   };
+
+  componentDidMount() {
+    this.setNewShape();
+  }
+
+  setNewShape() {
+    const { fieldSize, gameShapes, shapeControlledIndex } = this.state;
+    const shapesNew = [...gameShapes];
+    const allShapes = Object.values(shapes);
+    const randomShape = allShapes[random(allShapes.length)];
+    const randomPosition = {
+      x: random(fieldSize.x),
+      y: 0,
+    };
+    console.log(allShapes, random(allShapes.length), randomShape);
+    randomShape.position = getCorrectShapeFieldPosition(
+      randomPosition,
+      fieldSize,
+      randomShape,
+    );
+
+    shapesNew[shapeControlledIndex] = randomShape;
+    this.setState({ gameShapes: shapesNew });
+  }
 
   moveLeft = () => this.move({ x: -1, y: 0 });
   moveRight = () => this.move({ x: 1, y: 0 });
   moveDown = () => this.move({ x: 0, y: 1 });
 
   move = (direction: IVector) => {
-    const { fieldSize, shapes, shapeControlledIndex } = this.state;
-    const shapesNew = [...shapes];
+    const { fieldSize, gameShapes, shapeControlledIndex } = this.state;
+    const shapesNew = [...gameShapes];
     const shape = shapesNew[shapeControlledIndex];
 
     shape.position = getCorrectShapeFieldPosition(
@@ -56,12 +70,12 @@ export default class Game extends React.Component<{}, IGameState> {
       shape,
     );
 
-    this.setState({ shapes: shapesNew });
+    this.setState({ gameShapes: shapesNew });
   }
 
   rotate = (angle = 90) => {
-    const { fieldSize, shapes, shapeControlledIndex } = this.state;
-    const shapesNew = [...shapes];
+    const { fieldSize, gameShapes, shapeControlledIndex } = this.state;
+    const shapesNew = [...gameShapes];
     const shape = { ...shapesNew[shapeControlledIndex] };
 
     shape.cells = [...shape.cells].map(cell => ({
@@ -76,7 +90,7 @@ export default class Game extends React.Component<{}, IGameState> {
     );
 
     shapesNew[shapeControlledIndex] = shape;
-    this.setState({ shapes: shapesNew });
+    this.setState({ gameShapes: shapesNew });
   }
 
   onKeyDown = (key: string) => {
@@ -96,13 +110,13 @@ export default class Game extends React.Component<{}, IGameState> {
   }
 
   render() {
-    const { fieldSize, shapes } = this.state;
+    const { fieldSize, gameShapes } = this.state;
 
     return (
       <Content className='game'>
         <Control onKeyDown={this.onKeyDown} />
         <Field cellSize={CELL_SIZE} sizeX={fieldSize.x} sizeY={fieldSize.y}>
-          {shapes.map((shape, index) => (
+          {gameShapes.map((shape, index) => shape && (
             <Shape key={index} cellSize={CELL_SIZE} {...shape} />
           ))}
         </Field>
