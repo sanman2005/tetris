@@ -10,8 +10,8 @@ export interface IVector {
 
 export interface IShape {
   id?: string;
-  direction: IVector;
-  position: IVector;
+  direction?: IVector;
+  position?: IVector;
   cells: ICell[];
 }
 
@@ -19,17 +19,49 @@ export interface IShapeProps extends IShape {
   cellSize: number;
 }
 
-export const shapes: { [key: string]: IShape } = {
-  T: {
-    direction: { x: 1, y: 0 },
-    position: { x: 0, y: 0 },
-    cells: [
-      { offset: { x: 0, y: 0 } },
-      { offset: { x: -1, y: 0 } },
-      { offset: { x: 0, y: -1 } },
-      { offset: { x: 1, y: 0 } },
-    ],
-  },
+export const shapes: { [key: string]: ICell[] } = {
+  Cube: [
+    { offset: { x: 0, y: 0 } },
+    { offset: { x: 0, y: 1 } },
+    { offset: { x: 1, y: 0 } },
+    { offset: { x: 1, y: 1 } },
+  ],
+  Stick: [
+    { offset: { x: 0, y: 0 } },
+    { offset: { x: 1, y: 0 } },
+    { offset: { x: 2, y: 0 } },
+    { offset: { x: 3, y: 0 } },
+  ],
+  Zipper: [
+    { offset: { x: 0, y: 0 } },
+    { offset: { x: 1, y: 0 } },
+    { offset: { x: 1, y: 1 } },
+    { offset: { x: 2, y: 2 } },
+  ],
+  ZipperR: [
+    { offset: { x: 0, y: 1 } },
+    { offset: { x: 1, y: 1 } },
+    { offset: { x: 1, y: 0 } },
+    { offset: { x: 2, y: 0 } },
+  ],
+  L: [
+    { offset: { x: 0, y: 0 } },
+    { offset: { x: 1, y: 0 } },
+    { offset: { x: 2, y: 0 } },
+    { offset: { x: 2, y: 1 } },
+  ],
+  LR: [
+    { offset: { x: 0, y: 0 } },
+    { offset: { x: 0, y: 1 } },
+    { offset: { x: 1, y: 0 } },
+    { offset: { x: 2, y: 0 } },
+  ],
+  T: [
+    { offset: { x: 0, y: 0 } },
+    { offset: { x: -1, y: 0 } },
+    { offset: { x: 0, y: -1 } },
+    { offset: { x: 1, y: 0 } },
+  ],
 };
 
 export default ({ cellSize, direction, position, cells }: IShapeProps) => (
@@ -42,6 +74,8 @@ export default ({ cellSize, direction, position, cells }: IShapeProps) => (
       top: `${position.y * cellSize}px`,
     }}
   >
-    {cells.map(cell => <Cell {...cell} key={getPositionKey(cell.offset)}  />)}
+    {cells.map(cell => (
+      <Cell {...cell} key={getPositionKey(cell.offset)} />
+    ))}
   </div>
 );

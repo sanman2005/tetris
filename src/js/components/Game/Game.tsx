@@ -57,23 +57,24 @@ export default class Game extends React.Component<{}, IGameState> {
     const { field, gameShapes, shapeControlledIndex } = this.state;
     const shapesNew = [...gameShapes];
     const allShapes = Object.values(shapes);
-    const randomShape = allShapes[random(allShapes.length)];
-    const randomPosition = {
-      x: random(field.size.x),
-      y: 0,
+    const shape: IShape = {
+      id: uuid(),
+      cells: allShapes[random(allShapes.length)],
+      position: {
+        x: random(field.size.x),
+        y: 0,
+      },
+      direction: { x: 1, y: 0 },
     };
 
-    randomShape.id = uuid();
-    randomShape.position = randomPosition;
-
     correctShapeFieldPosition(
-      randomPosition,
-      { x: randomPosition.x, y: -1 },
+      shape.position,
+      { x: shape.position.x, y: -1 },
       field,
-      randomShape,
+      shape,
       position => {
-        randomShape.position = position;
-        shapesNew[shapeControlledIndex] = randomShape;
+        shape.position = position;
+        shapesNew[shapeControlledIndex] = shape;
         this.setState({ gameShapes: shapesNew });
       },
       () => console.log('gameover'),
