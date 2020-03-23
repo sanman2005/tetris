@@ -32,12 +32,13 @@ export const getCorrectShapeFieldPosition = (
   return correctPosition;
 };
 
-export const pointRotate = (vector: IVector, angle: number) => {
+export const pointRotate = (vector: IVector, degrees: number) => {
+  const angle = degrees * (Math.PI / 180);
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
 
   return {
-    x: cos * vector.x + sin * vector.y,
-    y: sin * vector.x + cos * vector.y,
+    x: Math.round(cos * vector.x - sin * vector.y),
+    y: Math.round(sin * vector.x + cos * vector.y),
   };
 };

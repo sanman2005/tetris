@@ -12,7 +12,7 @@ import NotFound from 'components/NotFound';
 import { Content } from 'components/Grid';
 import Field from './Field';
 import Shape, { IShape, IVector } from './Shape';
-import { getCorrectShapeFieldPosition } from './helpers';
+import { getCorrectShapeFieldPosition, pointRotate } from './GameHelpers';
 
 export const CELL_SIZE = 30;
 
@@ -45,7 +45,7 @@ export default class Game extends React.Component<{}, IGameState> {
   moveRight = () => this.move({ x: 1, y: 0 });
   moveDown = () => this.move({ x: 0, y: 1 });
 
-  move(direction: IVector) {
+  move = (direction: IVector) => {
     const { fieldSize, shapes, shapeControlledIndex } = this.state;
     const shapesNew = [...shapes];
     const shape = shapesNew[shapeControlledIndex];
@@ -59,7 +59,25 @@ export default class Game extends React.Component<{}, IGameState> {
     this.setState({ shapes: shapesNew });
   }
 
-  rotate() {}
+  rotate = (angle = 90) => {
+    const { fieldSize, shapes, shapeControlledIndex } = this.state;
+    const shapesNew = [...shapes];
+    const shape = { ...shapesNew[shapeControlledIndex] };
+
+    shape.cells = [...shape.cells].map(cell => ({
+      ...cell,
+      offset: pointRotate(cell.offset, angle),
+    }));
+
+    shape.position = getCorrectShapeFieldPosition(
+      shape.position,
+      fieldSize,
+      shape,
+    );
+
+    shapesNew[shapeControlledIndex] = shape;
+    this.setState({ shapes: shapesNew });
+  }
 
   onKeyDown = (key: string) => {
     const keyHandlers: { [key: string]: () => void } = {
