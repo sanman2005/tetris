@@ -53,6 +53,11 @@ export default class Game extends React.Component<{}, IGameState> {
     clearTimeout(this.timeoutShapeMove);
   }
 
+  gameover = () => {
+    clearTimeout(this.timeoutShapeMove);
+    console.log('gameover');
+  }
+
   setNewShape() {
     const { field, gameShapes, shapeControlledIndex } = this.state;
     const shapesNew = [...gameShapes];
@@ -77,7 +82,7 @@ export default class Game extends React.Component<{}, IGameState> {
         shapesNew[shapeControlledIndex] = shape;
         this.setState({ gameShapes: shapesNew });
       },
-      () => console.log('gameover'),
+      this.gameover,
     );
   }
 
