@@ -166,23 +166,27 @@ export default class Game extends React.Component<{}, IGameState> {
       removedRowsCount++;
 
       Object.keys(newFilledCellsCopy).forEach(key => {
-        if (!newFilledCellsCopy[key] || newFilledCellsCopy[key].y > index) {
+        const cell = newFilledCellsCopy[key];
+
+        if (!cell) {
           return;
         }
 
-        if (newFilledCellsCopy[key].y < index) {
-          newFilledCellsCopy[key].y++;
-          newFilledCells[getPositionKey(newFilledCellsCopy[key])] =
-            newFilledCellsCopy[key];
+        if (cell.y !== index) {
+          if (cell.y < index) {
+            cell.y++;
+          }
+
+          newFilledCells[getPositionKey(cell)] = cell;
         }
       });
     };
 
-    Object.keys(rowsFillCount).forEach(row => {
-      if (rowsFillCount[row] === size.x) {
-        clearRow(+row);
+    for (let i = 0; i < size.y; i++) {
+      if (rowsFillCount[i] === size.x) {
+        clearRow(i);
       }
-    });
+    }
 
     this.setState({
       field: { ...field, filledCells: newFilledCells },
