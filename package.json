@@ -23,6 +23,7 @@
     "@types/node": "^13.1.1",
     "@types/react-dom": "^16.9.5",
     "@types/uuid": "^7.0.2",
+    "@types/ws": "^7.2.3",
     "autoprefixer": "^9.7.3",
     "awesome-typescript-loader": "^5.2.1",
     "classnames": "^2.2.6",
@@ -70,7 +71,8 @@
     "tslint-loader": "^3.5.4",
     "typescript": "^3.6.3",
     "uuid": "^7.0.2",
-    "webpack": "^4.41.0"
+    "webpack": "^4.41.0",
+    "ws": "^7.2.3"
   },
   "devDependencies": {
     "@hot-loader/react-dom": "^16.9.0",
