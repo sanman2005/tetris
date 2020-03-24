@@ -5,7 +5,7 @@ import Cell from './Cell';
 import { getPositionKey } from './GameHelpers';
 
 export interface IField {
-  filledCells: { [key: string]: IVector};
+  filledCells: { [key: string]: IVector & { id: string }};
   size: IVector;
 }
 
@@ -31,7 +31,7 @@ export default ({ cellSize, children, filledCells, size }: IFieldProps) => (
       }}
     >
       {Object.values(filledCells).map((cell, index) => cell && (
-        <Cell offset={cell} key={getPositionKey(cell)} />
+        <Cell offset={cell} key={cell.id} />
       ))}
     </div>
     {children}

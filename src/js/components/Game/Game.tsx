@@ -165,7 +165,7 @@ export default class Game extends React.Component<{}, IGameState> {
         y: shape.position.y + cell.offset.y,
       };
 
-      filledCells[getPositionKey(cellPosition)] = cellPosition;
+      filledCells[getPositionKey(cellPosition)] = { ...cellPosition, id: uuid() };
     });
 
     this.setState(
