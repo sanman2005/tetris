@@ -60,7 +60,7 @@ export default class Game extends React.Component<{}, IGameState> {
   keyHandlersTimes: { [key: string]: number } = {};
 
   componentDidMount() {
-   this.newGame();
+    this.newGame();
   }
 
   componentWillUnmount() {
@@ -82,7 +82,7 @@ export default class Game extends React.Component<{}, IGameState> {
   gameover = () => {
     clearTimeout(this.timeoutShapeMove);
     this.setState({ gameOver: true });
-  };
+  }
 
   addNewShape() {
     const { field, gameOver, gameShapes, shapeControlledIndex } = this.state;
@@ -112,7 +112,7 @@ export default class Game extends React.Component<{}, IGameState> {
       { x: shape.position.x, y: -1 },
       field,
       shape,
-      position => {
+      (position) => {
         shape.position = position;
         shapesNew[shapeControlledIndex] = shape;
         this.setState({ gameShapes: shapesNew });
@@ -139,7 +139,7 @@ export default class Game extends React.Component<{}, IGameState> {
       shape.position,
       field,
       shape,
-      position => {
+      (position) => {
         shape.position = position;
         this.setState({ gameShapes: shapesNew });
       },
@@ -153,19 +153,22 @@ export default class Game extends React.Component<{}, IGameState> {
         this.addNewShape();
       },
     );
-  };
+  }
 
   fillFieldCells(shape: IShape) {
     const { field } = this.state;
     const filledCells = { ...field.filledCells };
 
-    shape.cells.forEach(cell => {
+    shape.cells.forEach((cell) => {
       const cellPosition = {
         x: shape.position.x + cell.offset.x,
         y: shape.position.y + cell.offset.y,
       };
 
-      filledCells[getPositionKey(cellPosition)] = { ...cellPosition, id: uuid() };
+      filledCells[getPositionKey(cellPosition)] = {
+        ...cellPosition,
+        id: uuid(),
+      };
     });
 
     this.setState(
@@ -197,7 +200,7 @@ export default class Game extends React.Component<{}, IGameState> {
       newFilledCells = {};
       removedRowsCount++;
 
-      Object.keys(newFilledCellsCopy).forEach(key => {
+      Object.keys(newFilledCellsCopy).forEach((key) => {
         const cell = newFilledCellsCopy[key];
 
         if (!cell) {
@@ -224,14 +227,14 @@ export default class Game extends React.Component<{}, IGameState> {
       field: { ...field, filledCells: newFilledCells },
       stats: { ...stats, rowsRemoved: stats.rowsRemoved + removedRowsCount },
     });
-  };
+  }
 
   moveShapeOnTimer = () => {
     this.timeoutShapeMove = setTimeout(() => {
       this.moveDown();
       this.moveShapeOnTimer();
     }, this.state.timeShapeMove * 1000);
-  };
+  }
 
   rotate = (angle = 90) => {
     const { field, gameShapes, shapeControlledIndex } = this.state;
@@ -248,14 +251,14 @@ export default class Game extends React.Component<{}, IGameState> {
       shape.position,
       field,
       shape,
-      position => {
+      (position) => {
         shape.position = position;
         shapesNew[shapeControlledIndex] = shape;
         this.setState({ gameShapes: shapesNew });
       },
-      () => {},
+      null,
     );
-  };
+  }
 
   onKeyDown = (key: string) => {
     const { gameOver } = this.state;
@@ -277,7 +280,7 @@ export default class Game extends React.Component<{}, IGameState> {
       keyHandlers[key]();
       this.keyHandlersTimes[key] = time;
     }
-  };
+  }
 
   render() {
     const { field, gameOver, gameShapes, stats } = this.state;

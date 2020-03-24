@@ -4,3 +4,4 @@
 dev/
 build/
 node_modules/
+dist/

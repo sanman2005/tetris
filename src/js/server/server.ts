@@ -1,12 +1,13 @@
 'use strict';
-import * as webSocket from 'ws';
-import * as React from 'react';
 
-import { server as serverConfig } from '../../config/app.config.json';
+import * as WebSocket from 'ws';
+
+import { server as serverConfig } from '../../../config/app.config.json';
 import * as lobby from './lobby';
 
 const { port } = serverConfig;
-const wss = new webSocket.Server({ port });
+
+const wss = new WebSocket.Server({ port });
 
 const getPublicRooms = () => {
   const { public: rooms } = lobby.getRooms();
@@ -17,8 +18,8 @@ const getPublicRooms = () => {
   }));
 };
 
-wss.on('connection', (socket, request, client) => {
-  socket.on('message', message => {
+wss.on('connection', (socket: any, request: any, client: any) => {
+  socket.on('message', (message: string) => {
     console.log('received: %s', message);
   });
 

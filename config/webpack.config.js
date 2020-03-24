@@ -3,6 +3,8 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const StartServerWebpackPlugin = require('start-server-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 const path = require('path');
 const buildConfig = require('./build.config');
@@ -10,6 +12,7 @@ const srcPath = path.resolve(__dirname, '../', buildConfig.srcPath);
 
 require('dotenv').config();
 
+const isServer = process.env.NODE_MODE === 'server';
 let env = process.env.NODE_ENV;
 
 if (!env) {
@@ -18,20 +21,24 @@ if (!env) {
 
 const isProd = env === 'production';
 const isDevServer = process.argv.some(v => v.includes('webpack-dev-server'));
-const localPort = 3000;
+const localPort = isServer ? 3001 : 3000;
 
 process.env.APP_MODE = process.env.APP_MODE || 'work';
 
 module.exports = {
   mode: env,
-  entry: {
-    client: path.resolve(srcPath, './js/client.tsx'),
-    // server: path.resolve(srcPath, './js/server.tsx'),
-  },
+  entry: isServer
+    ? {
+        server: path.resolve(srcPath, './js/server/server.ts'),
+      }
+    : {
+        client: path.resolve(srcPath, './js/client.tsx'),
+      },
   output: {
-    filename: '[name].[hash:8].js',
+    filename: () => `[name]${isServer ? '' : '.[hash:8]'}.js`,
     publicPath: '/',
   },
+  target: 'node',
   resolve: {
     extensions: [
       '.ts',
@@ -53,31 +60,51 @@ module.exports = {
       node: path.resolve(__dirname, '../node_modules'),
       pages: path.resolve(srcPath, './js/pages'),
     },
+    mainFields: ['module', 'main'],
+  },
+  node: {
+    net: 'empty',
+    tls: 'empty',
+    dns: 'empty',
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: `${srcPath}/static/index.html`,
-      hmr: !isProd,
-    }),
-    new MiniCssExtractPlugin({
-      filename: '[name].[hash:8].css',
-      chunkFilename: '[id].css',
-      hmr: !isProd,
-    }),
-    new CopyWebpackPlugin([
-      {
-        from: `${srcPath}/static`,
-        to: './',
-      },
-      {
-        from: `${srcPath}/manifest.json`,
-        to: './',
-      },
-      {
-        from: `${srcPath}/img`,
-        to: './img',
-      },
-    ]),
+    ...(isServer
+      ? [
+          new CleanWebpackPlugin(),
+          new StartServerWebpackPlugin({
+            name: 'server.js',
+            nodeArgs: [],
+            args: [],
+            signal: true,
+            keyboard: true,
+          }),
+        ]
+      : [
+          new HtmlWebpackPlugin({
+            template: `${srcPath}/static/index.html`,
+            hmr: !isProd,
+            scriptLoading: 'defer',
+          }),
+          new MiniCssExtractPlugin({
+            filename: '[name].[hash:8].css',
+            chunkFilename: '[id].css',
+            hmr: !isProd,
+          }),
+          new CopyWebpackPlugin([
+            {
+              from: `${srcPath}/static`,
+              to: './',
+            },
+            {
+              from: `${srcPath}/manifest.json`,
+              to: './',
+            },
+            {
+              from: `${srcPath}/img`,
+              to: './img',
+            },
+          ]),
+        ]),
     new webpack.DefinePlugin(
       Object.keys(process.env).reduce(
         (result, key) => ({
@@ -91,6 +118,7 @@ module.exports = {
   devtool: !isProd && 'source-map',
   devServer: {
     historyApiFallback: true,
+    host: '0.0.0.0',
     hot: true,
     open: true,
     overlay: true,
@@ -98,7 +126,6 @@ module.exports = {
     pfxPassphrase: 'localhost',
     port: localPort,
     publicPath: '/',
-    host: '0.0.0.0',
     public: `localhost:${localPort}`,
   },
   optimization: {

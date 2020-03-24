@@ -2,13 +2,13 @@
   "api": {
     "host": {
       "local": "http://127.0.0.1",
-      "development": "https://dev.api.to-be.dev",
-      "production": "https://api.team-maker.ru"
+      "development": "https://tetris.dev.sanman.ru",
+      "production": "https://tetris.sanman.ru"
     }
   },
   "social": {
     "google": {
-      "clientId": "522849970514-33n7qjj9ql83hir70j27ecioqfsen972.apps.googleusercontent.com"
+      "clientId": ""
     }
   },
   "server": {

@@ -9,7 +9,7 @@ const roomsPrivate: TRooms = {};
 
 const addRoom = (rooms: TRooms, room: IRoom) => {
   if (rooms[room.id]) {
-    throw 'room with this id already exists';
+    throw new Error('room with this id already exists');
   }
 
   rooms[room.id] = room;
@@ -50,11 +50,11 @@ export const addClientToPublicRoom = (roomId: string, client: IClient) => {
   const room = roomsPublic[roomId];
 
   if (!room) {
-    throw 'room does not exist';
+    throw new Error('room does not exist');
   }
 
   if (room.players.length === room.options.playersMax) {
-    throw 'room is full';
+    throw new Error('room is full');
   }
 
   room.players.push(client);
@@ -66,13 +66,13 @@ export const removeClientFromPublicRoom = (roomId: string, client: IClient) => {
   const room = roomsPublic[roomId];
 
   if (!room) {
-    throw 'room does not exist';
+    throw new Error('room does not exist');
   }
 
   const playerIndex = room.players.indexOf(client);
 
   if (playerIndex < 0) {
-    throw 'client was not found in room';
+    throw new Error('client was not found in room');
   }
 
   room.players.splice(playerIndex, 1);
