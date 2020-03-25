@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-import { IClient, IRoom, IRoomOptions } from './room';
+import { createRoom, IClient, IRoom, IRoomOptions } from './room';
 
 type TRooms = { [key: string]: IRoom };
 
@@ -13,16 +13,6 @@ const addRoom = (rooms: TRooms, room: IRoom) => {
   }
 
   rooms[room.id] = room;
-};
-
-const createRoom = (client: IClient, options: IRoomOptions) => {
-  const room: IRoom = {
-    id: uuid(),
-    players: [client],
-    options,
-  };
-
-  return room;
 };
 
 export const createPublicRoom = (client: IClient, options: IRoomOptions) => {
@@ -41,11 +31,6 @@ export const createPrivateRoom = (client: IClient, options: IRoomOptions) => {
   return room;
 };
 
-export const getRooms = () => ({
-  public: roomsPublic,
-  private: roomsPrivate,
-});
-
 export const addClientToPublicRoom = (roomId: string, client: IClient) => {
   const room = roomsPublic[roomId];
 
@@ -53,11 +38,7 @@ export const addClientToPublicRoom = (roomId: string, client: IClient) => {
     throw new Error('room does not exist');
   }
 
-  if (room.players.length === room.options.playersMax) {
-    throw new Error('room is full');
-  }
-
-  room.players.push(client);
+  room.addPlayer(client);
 
   return room;
 };
@@ -69,13 +50,14 @@ export const removeClientFromPublicRoom = (roomId: string, client: IClient) => {
     throw new Error('room does not exist');
   }
 
-  const playerIndex = room.players.indexOf(client);
-
-  if (playerIndex < 0) {
-    throw new Error('client was not found in room');
-  }
-
-  room.players.splice(playerIndex, 1);
+  room.removePlayer(client);
 
   return room;
 };
+
+export const getPublicRooms = () =>
+  Object.values(roomsPublic).map(room => ({
+    id: room.id,
+    playersCount: room.players.length,
+    title: room.options.title,
+  }));

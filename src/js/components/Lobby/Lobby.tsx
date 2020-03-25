@@ -1,15 +1,7 @@
 import * as React from 'react';
 
-import {
-  addConnectListener,
-  addDisconnectListener,
-  addReceiveListener,
-  connect,
-  removeConnectListener,
-  removeDisconnectListener,
-  removeReceiveListener,
-  send,
-} from 'js/apiSocket';
+import * as apiSocket from 'js/apiSocket';
+import * as apiListeners from 'js/apiListeners';
 
 interface ILobbyState {
   connected: boolean;
@@ -21,23 +13,23 @@ export default class Lobby extends React.Component {
   };
 
   componentDidMount() {
-    addConnectListener(this.onConnect);
-    addDisconnectListener(this.onDisconnect);
-    addReceiveListener('lobby', this.onReceive);
-    connect();
+    apiListeners.addConnectListener(this.onConnect);
+    apiListeners.addDisconnectListener(this.onDisconnect);
+    apiListeners.addReceiveListener('lobby', this.onReceive);
+    apiSocket.connect();
   }
 
   componentWillUnmount() {
-    removeConnectListener(this.onConnect);
-    removeDisconnectListener(this.onDisconnect);
-    removeReceiveListener('lobby', this.onReceive);
+    apiListeners.removeConnectListener(this.onConnect);
+    apiListeners.removeDisconnectListener(this.onDisconnect);
+    apiListeners.removeReceiveListener('lobby', this.onReceive);
   }
 
   onConnect = () => this.setState({ connected: true });
 
   onDisconnect = () => {
     this.setState({ connected: false });
-    connect();
+    apiSocket.connect();
   }
 
   onReceive = (data: object) => {
