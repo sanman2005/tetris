@@ -18,12 +18,16 @@ const getPublicRooms = () => {
   }));
 };
 
+const sendSocket = (socket: any, action: string, data: object) =>
+  socket.send(JSON.stringify({ action, data }));
+
+const sendLobby = (socket: any) =>
+  sendSocket(socket, 'lobby', getPublicRooms());
+
 wss.on('connection', (socket: any, request: any, client: any) => {
   socket.on('message', (message: string) => {
     console.log('received: %s', message);
   });
 
-  const publicRooms = getPublicRooms();
-
-  socket.send(JSON.stringify(publicRooms));
+  sendLobby(socket);
 });

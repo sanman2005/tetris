@@ -2,7 +2,7 @@
   "api": {
     "host": {
       "local": "http://127.0.0.1",
-      "development": "https://tetris.dev.sanman.ru",
+      "development": "http://127.0.0.1",
       "production": "https://tetris.sanman.ru"
     }
   },
@@ -12,6 +12,11 @@
     }
   },
   "server": {
+    "host": {
+      "local": "ws://127.0.0.1",
+      "development": "wss://tetris.dev.sanman.ru",
+      "production": "wss://tetris.sanman.ru"
+    },
     "port": 9000
   },
   "ssr": {

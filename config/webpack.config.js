@@ -26,7 +26,7 @@ const localPort = isServer ? 3001 : 3000;
 process.env.APP_MODE = process.env.APP_MODE || 'work';
 
 module.exports = {
-  mode: env,
+  mode: isProd ? 'production' : 'development',
   entry: isServer
     ? {
         server: path.resolve(srcPath, './js/server/server.ts'),
@@ -38,7 +38,7 @@ module.exports = {
     filename: () => `[name]${isServer ? '' : '.[hash:8]'}.js`,
     publicPath: '/',
   },
-  target: 'node',
+  target: isServer ? 'node' : 'web',
   resolve: {
     extensions: [
       '.ts',

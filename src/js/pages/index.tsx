@@ -6,6 +6,7 @@ import 'dayjs/locale/ru';
 
 import Layout from 'components/Layout';
 import { PageManager, PageRoute } from 'components/PageManager';
+import Lobby from 'components/Lobby';
 import Login, { Stages } from 'components/Login';
 import Logout from 'components/Logout';
 import Page404 from 'components/NotFound';
@@ -25,6 +26,7 @@ dayjs.locale(getLang());
 
 export const pagesPath = {
   game: `/game`,
+  lobby: `/lobby`,
   login: `/${Stages.login}`,
   logout: '/logout',
   profile: '/profile',
@@ -55,8 +57,9 @@ class Root extends React.Component<RouteComponentProps & any> {
             theme='login'
             isLast
           />
-          <PageRoute path={pagesPath.logout} component={Logout} />
           <PageRoute path={pagesPath.game} component={Game} />
+          <PageRoute path={pagesPath.logout} component={Logout} />
+          <PageRoute path={pagesPath.lobby} component={Lobby} />
           <PageRoute
             path={pagesPath.profile}
             component={Profile}
