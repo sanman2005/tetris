@@ -1,0 +1,27 @@
+.lobby
+  width 100%
+  max-width 700px
+
+  &__disconnect
+    text-align center
+    font-size 20px
+    font-weight bold
+    color $colorRed2
+
+  &__rooms
+    &-list
+      padding $columnPadding
+      min-height 50vh
+      shadowInset(3px)
+
+    .title
+      padding-bottom 20px
+      font-size 20px
+
+  &__room
+    flex()
+    shadow($colorShadowLight, 5px)
+    padding $columnPadding
+
+  &__create
+    margin-top 40px

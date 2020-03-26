@@ -28,5 +28,5 @@ export const connect = () => {
 
 export const isConnected = () => ws && ws.OPEN;
 
-export const send = (action: string, data: object) =>
+export const send = (action: listeners.TAction, data: object) =>
   ws && ws.send(JSON.stringify({ action, data }));

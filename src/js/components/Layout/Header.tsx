@@ -65,7 +65,6 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
   }
 
   render() {
-    const { location } = this.props;
     const { isMenuOpen, isScrolled, theme } = this.state;
     const account = Account.getData().value;
     const themeClass = `theme-${theme}`;
@@ -105,13 +104,13 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
                 type='icon-main'
                 shadow
               />
-              <Button
+              {/*<Button
                 className='header__profile'
                 href={account ? pagesPath.profile : pagesPath.login}
                 icon={account ? <Icons.profile /> : <Icons.enter />}
                 type='icon-main'
                 shadow
-              />
+              />*/}
               <Button
                 className='header__burger'
                 onClick={this.toggleMenu}

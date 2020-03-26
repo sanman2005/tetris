@@ -11,6 +11,8 @@ const listeners: {
   receive: {},
 };
 
+export type TAction = string | number;
+
 export const addConnectListener = (callback: IListener) =>
   !listeners.connect.includes(callback) && listeners.connect.push(callback);
 
@@ -35,7 +37,7 @@ export const removeDisconnectListener = (callback: IListener) => {
 };
 
 export const addReceiveListener = (
-  action: string,
+  action: TAction,
   callback: IReceiveListener,
 ) => {
   const actionListeners = listeners.receive[action] || [];
@@ -47,7 +49,7 @@ export const addReceiveListener = (
 };
 
 export const removeReceiveListener = (
-  action: string,
+  action: TAction,
   callback: IReceiveListener,
 ) => {
   const actionListeners = listeners.receive[action] || [];
@@ -64,7 +66,7 @@ export const notifyConnectListeners = () =>
 export const notifyDisconnectListeners = () =>
   listeners.disconnect.forEach(listener => listener());
 
-export const notifyReceiveListeners = (action: string, data: object) => {
+export const notifyReceiveListeners = (action: TAction, data: object) => {
   const actionListeners = listeners.receive[action];
 
   if (actionListeners) {

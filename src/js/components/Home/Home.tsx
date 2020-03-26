@@ -19,9 +19,15 @@ export default () => (
     />
     <div className='home__links'>
       <Button
-        className='home__teams'
+        className='home__game'
         href={pagesPath.game}
         text={i18n`start`}
+        type='main2'
+      />
+      <Button
+        className='home__game'
+        href={pagesPath.lobby}
+        text={i18n`start online`}
         type='main2'
       />
     </div>
