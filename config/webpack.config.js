@@ -127,6 +127,7 @@ module.exports = {
     port: localPort,
     publicPath: '/',
     public: `localhost:${localPort}`,
+    writeToDisk: isServer,
   },
   optimization: {
     minimize: isProd,
