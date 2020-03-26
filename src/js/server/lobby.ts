@@ -1,63 +1,78 @@
-import { v4 as uuid } from 'uuid';
-
-import { createRoom, IClient, IRoom, IRoomOptions } from './room';
+import * as listeners from 'api/listeners';
+import actions from 'api/actions';
+import { createRoom, IRoom, IRoomOptions, IData } from './room';
 
 type TRooms = { [key: string]: IRoom };
 
-const roomsPublic: TRooms = {};
-const roomsPrivate: TRooms = {};
+interface ILobby {
+  getPublicRooms: () => object;
+}
 
-const addRoom = (rooms: TRooms, room: IRoom) => {
-  if (rooms[room.id]) {
-    throw new Error('room with this id already exists');
+class Lobby {
+  rooms: TRooms = {};
+  roomsPublic: TRooms = {};
+  roomsPrivate: TRooms = {};
+
+  constructor() {
+    listeners.addReceiveListener(actions.roomCreate, this.createRoom);
+    listeners.addReceiveListener(actions.roomJoin, this.addPlayerToRoom);
+    listeners.addReceiveListener(actions.roomLeave, this.removePlayerFromRoom);
   }
 
-  rooms[room.id] = room;
-};
+  addRoom = (room: IRoom) => {
+    if (this.rooms[room.id]) {
+      throw new Error('room with this id already exists');
+    }
 
-export const createPublicRoom = (client: IClient, options: IRoomOptions) => {
-  const room = createRoom(client, options);
+    const rooms = room.options.private ? this.roomsPrivate : this.roomsPublic;
 
-  addRoom(roomsPublic, room);
-
-  return room;
-};
-
-export const createPrivateRoom = (client: IClient, options: IRoomOptions) => {
-  const room = createRoom(client, options);
-
-  addRoom(roomsPrivate, room);
-
-  return room;
-};
-
-export const addClientToPublicRoom = (roomId: string, client: IClient) => {
-  const room = roomsPublic[roomId];
-
-  if (!room) {
-    throw new Error('room does not exist');
+    rooms[room.id] = room;
+    this.rooms[room.id] = room;
   }
 
-  room.addPlayer(client);
+  createRoom = ({ player, data }: IData<IRoomOptions>) => {
+    const room = createRoom(player, data);
 
-  return room;
-};
-
-export const removeClientFromPublicRoom = (roomId: string, client: IClient) => {
-  const room = roomsPublic[roomId];
-
-  if (!room) {
-    throw new Error('room does not exist');
+    this.addRoom(room);
   }
 
-  room.removePlayer(client);
+  addPlayerToRoom = ({
+    player,
+    data,
+  }: IData<{ roomId: string }>) => {
+    const room = this.rooms[data.roomId];
 
-  return room;
-};
+    if (!room) {
+      throw new Error('room does not exist');
+    }
 
-export const getPublicRooms = () =>
-  Object.values(roomsPublic).map(room => ({
-    id: room.id,
-    playersCount: room.players.length,
-    title: room.options.title,
-  }));
+    room.addPlayer(player);
+
+    return room;
+  }
+
+  removePlayerFromRoom = ({
+    player,
+    data,
+  }: IData<{ roomId: string }>) => {
+    const room = this.rooms[data.roomId];
+    const rooms = room.options.private ? this.roomsPrivate : this.roomsPublic;
+
+    if (!room) {
+      throw new Error('room does not exist');
+    }
+
+    room.removePlayer(player);
+
+    return room;
+  }
+
+  getPublicRooms = () =>
+    Object.values(this.roomsPublic).map(room => ({
+      id: room.id,
+      playersCount: room.players.length,
+      title: room.options.title,
+    }))
+}
+
+export default new Lobby() as ILobby;

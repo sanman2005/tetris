@@ -1,7 +1,10 @@
+export type TAction = string | number;
+
 enum actions {
   roomCreate,
-  roomJoin,
   roomsGet,
+  roomJoin,
+  roomLeave,
 }
 
 export default actions;

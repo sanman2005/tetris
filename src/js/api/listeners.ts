@@ -1,3 +1,5 @@
+import { TAction } from './actions';
+
 export type IListener = () => void;
 export type IReceiveListener = (data?: object) => void;
 
@@ -10,8 +12,6 @@ const listeners: {
   disconnect: [],
   receive: {},
 };
-
-export type TAction = string | number;
 
 export const addConnectListener = (callback: IListener) =>
   !listeners.connect.includes(callback) && listeners.connect.push(callback);

@@ -1,4 +1,5 @@
 import { env } from 'js/helpers';
+import { TAction } from './actions';
 import * as listeners from './listeners';
 import { server as apiConfig } from '../../../config/app.config.json';
 
@@ -22,11 +23,12 @@ export const connect = () => {
 
   socket.onmessage = ({ data: rawData }) => {
     const { action, data } = JSON.parse(rawData);
+
     listeners.notifyReceiveListeners(action, data);
   };
 };
 
 export const isConnected = () => ws && ws.OPEN;
 
-export const send = (action: listeners.TAction, data: object) =>
+export const send = (action: TAction, data: object) =>
   ws && ws.send(JSON.stringify({ action, data }));

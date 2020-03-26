@@ -1,26 +1,30 @@
 import { v4 as uuid } from 'uuid';
 
-export interface IClient {
+import { IPlayer } from './player';
 
+export interface IData<T> {
+  player: IPlayer;
+  data: T;
 }
 
 export interface IRoomOptions {
   playersMax: number;
+  private: boolean;
   title: string;
 }
 
 export interface IRoom {
   id: string;
-  players: IClient[];
+  players: IPlayer[];
   options: IRoomOptions;
-  addPlayer: (player: IClient) => void;
-  removePlayer: (player: IClient) => void;
+  addPlayer: (player: IPlayer) => void;
+  removePlayer: (player: IPlayer) => void;
 }
 
-export const createRoom = (client: IClient, options: IRoomOptions) => {
+export const createRoom = (creator: IPlayer, options: IRoomOptions) => {
   const room: IRoom = {
     id: uuid(),
-    players: [client],
+    players: [creator],
     options,
     addPlayer(player) {
       if (this.players.length === this.options.playersMax) {
