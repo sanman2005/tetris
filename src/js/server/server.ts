@@ -4,7 +4,7 @@ import * as WebSocket from 'ws';
 
 import { server as serverConfig } from '../../../config/app.config.json';
 import * as lobby from './lobby';
-import * as listeners from '../apiListeners';
+import * as listeners from 'api/listeners';
 
 const { port } = serverConfig;
 const wss = new WebSocket.Server({ port });

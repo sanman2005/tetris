@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiTokenSet, isApiTokenExists } from '../api';
+import { apiGet, apiPost, apiPatch, apiTokenSet, isApiTokenExists } from 'api/rest';
 import Model, { IModelResult, ModelStatus } from '.';
 import User, { TPerson } from './user';
 import Notification from './notification';

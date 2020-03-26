@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import * as apiSocket from 'js/apiSocket';
-import * as apiListeners from 'js/apiListeners';
+import * as apiSocket from 'api/socket';
+import * as apiListeners from 'api/listeners';
 
 interface ILobbyState {
   connected: boolean;

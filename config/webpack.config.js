@@ -51,6 +51,7 @@ module.exports = {
       '.svg',
     ],
     alias: {
+      api: path.resolve(srcPath, './js/api'),
       components: path.resolve(srcPath, './js/components'),
       config: path.resolve('./'),
       css: path.resolve(srcPath, './css'),
@@ -120,7 +121,7 @@ module.exports = {
     historyApiFallback: true,
     host: '0.0.0.0',
     hot: true,
-    open: true,
+    open: !isServer,
     overlay: true,
     pfx: './certificate/localhost.pfx',
     pfxPassphrase: 'localhost',

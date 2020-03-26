@@ -1,5 +1,6 @@
-import { apiDelete, apiGet, apiPost, apiSend, TApiMethods } from '../api';
 import * as equal from 'react-fast-compare';
+
+import { apiGet, apiPost, apiSend, TApiMethods } from 'api/rest';
 import storeGlobal from '../store';
 import { isClient, isTest } from '../helpers';
 

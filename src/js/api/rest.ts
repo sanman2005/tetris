@@ -1,5 +1,5 @@
-import { isClient, isDev, env } from './helpers';
-import { api as apiConfig } from '../../config/app.config.json';
+import { isClient, isDev, env } from 'js/helpers';
+import { api as apiConfig } from '../../../config/app.config.json';
 
 export const apiResponseMessages = {
   login: {
