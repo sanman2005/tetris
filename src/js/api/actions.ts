@@ -5,6 +5,7 @@ enum actions {
   roomsGet,
   roomJoin,
   roomLeave,
+  lobbyUpdate,
 }
 
 export default actions;

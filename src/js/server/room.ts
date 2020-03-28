@@ -15,19 +15,23 @@ export interface IRoomOptions {
 
 export interface IRoom {
   id: string;
+  isFull: boolean;
   players: IPlayer[];
   options: IRoomOptions;
   addPlayer: (player: IPlayer) => void;
   removePlayer: (player: IPlayer) => void;
 }
 
-export const createRoom = (creator: IPlayer, options: IRoomOptions) => {
+export const createRoom = (options: IRoomOptions) => {
   const room: IRoom = {
     id: uuid(),
-    players: [creator],
+    players: [],
     options,
+    get isFull() {
+      return this.players.length === this.options.playersMax;
+    },
     addPlayer(player) {
-      if (this.players.length === this.options.playersMax) {
+      if (this.isFull) {
         throw new Error('room is full');
       }
 
@@ -37,7 +41,7 @@ export const createRoom = (creator: IPlayer, options: IRoomOptions) => {
       const playerIndex = this.players.indexOf(player);
 
       if (playerIndex < 0) {
-        throw new Error('client was not found in room');
+        throw new Error('player was not found in room');
       }
 
       this.players.splice(playerIndex, 1);
