@@ -1,13 +1,16 @@
 import * as listeners from 'api/listeners';
-import actions from 'api/actions';
+import actions, { TAction } from 'api/actions';
 import { createRoom, IRoom, IRoomOptions, IData } from './room';
 import { IPlayer } from './player';
+import Game from '../components/Game';
 
 type TRooms = { [key: string]: IRoom };
 type TPlayers = { [key: string]: IPlayer };
 
 interface ILobby {
+  addPlayer: (player: IPlayer) => void;
   getPublicRooms: () => object;
+  removePlayer: (player: IPlayer) => void;
 }
 
 const MAX_ROOMS_COUNT_TO_SEND = 20;
@@ -24,6 +27,22 @@ class Lobby {
     listeners.addReceiveListener(actions.roomLeave, this.removePlayerFromRoom);
   }
 
+  addPlayer = (player: IPlayer) => {
+    if (this.players[player.id]) {
+      throw new Error('player with this id already exists');
+    }
+
+    this.players[player.id] = player;
+  }
+
+  removePlayer = (player: IPlayer) => {
+    if (this.players[player.id]) {
+      throw new Error('player with this id does not exists');
+    }
+
+    delete this.players[player.id];
+  }
+
   addRoom = (room: IRoom) => {
     if (this.rooms[room.id]) {
       throw new Error('room with this id already exists');
@@ -36,39 +55,33 @@ class Lobby {
   }
 
   createRoom = ({ player, data }: IData<IRoomOptions>) => {
-    if (this.players[player.id]) {
-      throw new Error('player with this id already exists');
-    }
-
     const room = createRoom(data);
 
     this.addRoom(room);
-    this.addPlayerToRoom({ player, data: { roomId: room.id }});
+    this.addPlayerToRoom({ player, data: { roomId: room.id } });
+
+    new Game({ room, onEnd: () => {} });
   }
 
   addPlayerToRoom = ({ player, data }: IData<{ roomId: string }>) => {
+    if (player.room) {
+      throw new Error('player is already in another room');
+    }
+
     const room = this.rooms[data.roomId];
 
     if (!room) {
       throw new Error('room does not exist');
     }
 
-    if (this.players[player.id]) {
-      throw new Error('player with this id already exists');
-    }
-
     room.addPlayer(player);
-    this.players[player.id] = player;
     player.changeRoom(room);
 
     this.sendLobby();
-
-    return room;
   }
 
   removePlayerFromRoom = ({ player, data }: IData<{ roomId: string }>) => {
     const room = this.rooms[data.roomId];
-    const rooms = room.options.private ? this.roomsPrivate : this.roomsPublic;
 
     if (!room) {
       throw new Error('room does not exist');
@@ -76,19 +89,27 @@ class Lobby {
 
     room.removePlayer(player);
     player.changeRoom(null);
+    delete this.players[player.id];
+
+    if (room.isEmpty) {
+      delete this.roomsPublic[room.id];
+      delete this.roomsPrivate[room.id];
+      delete this.rooms[room.id];
+    }
 
     this.sendLobby();
-
-    return room;
   }
 
   sendLobby = () => {
     const roomsPublic = this.getPublicRooms();
 
-    Object.values(this.players).forEach(
-      player => player.room && player.send(actions.lobbyUpdate, roomsPublic),
-    );
+    this.sendToPlayers(actions.lobbyUpdate, roomsPublic);
   }
+
+  sendToPlayers = (action: TAction, data: object) =>
+    Object.values(this.players).forEach(
+      player => !player.room && player.send(action, data),
+    )
 
   getPublicRooms = () =>
     Object.values(this.roomsPublic)

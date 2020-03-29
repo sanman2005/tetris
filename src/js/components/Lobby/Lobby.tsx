@@ -4,6 +4,7 @@ import actions from 'api/actions';
 import * as apiSocket from 'api/socket';
 import * as apiListeners from 'api/listeners';
 import i18n from 'js/i18n';
+import Constants from 'js/constants';
 
 import Button from 'components/Button';
 import { Form, TFormSubmit } from 'components/Form';
@@ -34,14 +35,14 @@ export default class Lobby extends React.Component {
   componentDidMount() {
     apiListeners.addConnectListener(this.onConnect);
     apiListeners.addDisconnectListener(this.onDisconnect);
-    apiListeners.addReceiveListener(actions.roomsGet, this.setRooms);
+    apiListeners.addReceiveListener(actions.lobbyUpdate, this.setRooms);
     apiSocket.connect();
   }
 
   componentWillUnmount() {
     apiListeners.removeConnectListener(this.onConnect);
     apiListeners.removeDisconnectListener(this.onDisconnect);
-    apiListeners.removeReceiveListener(actions.roomsGet, this.setRooms);
+    apiListeners.removeReceiveListener(actions.lobbyUpdate, this.setRooms);
   }
 
   onConnect = () => this.setState({ connected: true });
@@ -72,10 +73,10 @@ export default class Lobby extends React.Component {
           title={i18n`roomsAvailable`}
         >
           {rooms.map(room => (
-            <div key={room.id}>
+            <div className='lobby__room-content' key={room.id}>
               <div className='lobby__room-title'>{room.title}</div>
               <div className='lobby__room-players'>
-                {i18n`playersCount`}
+                {i18n`playersCount`}:
                 <span>{room.playersCount}</span>
               </div>
               <Button text={i18n`join`} onClick={() => this.join(room.id)} />
@@ -98,7 +99,7 @@ export default class Lobby extends React.Component {
         <Form
           error={this.state.error}
           fields={{
-            title: <InputName required />,
+            title: <InputName required maxLength={Constants.roomTitleLengthMax} />,
           }}
           sendText={i18n`create`}
           buttons={[

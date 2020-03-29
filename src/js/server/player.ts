@@ -15,7 +15,7 @@ export default class Player {
   send: IPlayer['send'];
   room: IRoom;
 
-  constructor(send: IPlayer['send'], room: IRoom) {
+  constructor(send: IPlayer['send'], room?: IRoom) {
     this.id = uuid();
     this.room = room;
     this.send = send;

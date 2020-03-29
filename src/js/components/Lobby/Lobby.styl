@@ -17,11 +17,31 @@
     .title
       padding-bottom 20px
       font-size 20px
+      color $colorTextMain
 
   &__room
-    flex()
-    shadow($colorShadowLight, 5px)
-    padding $columnPadding
+    & + &
+      margin-top $columnPadding
+
+    &-content
+      flex()
+      shadow($colorShadowLight, 5px)
+      padding $columnPadding
+
+    &-title
+      itemTitle()
+      color $colorMain1
+
+    &-players
+      span
+        margin-left 5px
+        font-size 20px
+        font-weight bold
+        color $colorOrange
+
+    .button
+      max-width 200px
+      color $colorMain2
 
   &__create
     margin-top 40px

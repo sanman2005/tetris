@@ -11,28 +11,50 @@ import Player from './player';
 const { port } = serverConfig;
 const wss = new WebSocket.Server({ port });
 
+const logError = (error: Error) => {
+  console.error(error.message);
+};
+
 const sendSocket = (socket: any, action: TAction, data: object) =>
   socket.send(JSON.stringify({ action, data }));
 
 const sendLobby = (socket: any) =>
-  sendSocket(socket, actions.roomsGet, lobby.getPublicRooms());
+  sendSocket(socket, actions.lobbyUpdate, lobby.getPublicRooms());
 
 wss.on('connection', (socket: WebSocket) => {
   const player = new Player((action, data) => sendSocket(socket, action, data));
+  const onClose = () => {
+    try {
+      lobby.removePlayer(player);
+    } catch (e) {
+      logError(e);
+    }
+  };
 
-  socket.on('close', () => {});
+  socket.on('close', onClose);
 
   socket.on('error', () => {
     if (socket.OPEN) {
       socket.close();
     }
+
+    onClose();
   });
 
   socket.on('message', (message: string) => {
-    const { action, data } = JSON.parse(message);
+    try {
+      const { action, data } = JSON.parse(message);
 
-    listeners.notifyReceiveListeners(action, { player, data });
+      listeners.notifyReceiveListeners(action, { player, data });
+    } catch (e) {
+      logError(e);
+    }
   });
 
-  sendLobby(socket);
+  try {
+    lobby.addPlayer(player);
+    sendLobby(socket);
+  } catch (e) {
+    logError(e);
+  }
 });

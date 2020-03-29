@@ -1,11 +1,10 @@
 export type TAction = string | number;
 
 enum actions {
+  lobbyUpdate,
   roomCreate,
-  roomsGet,
   roomJoin,
   roomLeave,
-  lobbyUpdate,
 }
 
 export default actions;

@@ -1,8 +1,9 @@
 import { v4 as uuid } from 'uuid';
 
 import { IPlayer } from './player';
+import Constants from 'js/constants';
 
-export interface IData<T> {
+export interface IData<T = object> {
   player: IPlayer;
   data: T;
 }
@@ -16,6 +17,7 @@ export interface IRoomOptions {
 export interface IRoom {
   id: string;
   isFull: boolean;
+  isEmpty: boolean;
   players: IPlayer[];
   options: IRoomOptions;
   addPlayer: (player: IPlayer) => void;
@@ -23,6 +25,12 @@ export interface IRoom {
 }
 
 export const createRoom = (options: IRoomOptions) => {
+  if (!options.title) {
+    throw new Error('room title is empty');
+  }
+
+  options.title = options.title.slice(0, Constants.roomTitleLengthMax);
+
   const room: IRoom = {
     id: uuid(),
     players: [],
@@ -30,9 +38,16 @@ export const createRoom = (options: IRoomOptions) => {
     get isFull() {
       return this.players.length === this.options.playersMax;
     },
+    get isEmpty() {
+      return !this.players.length;
+    },
     addPlayer(player) {
       if (this.isFull) {
         throw new Error('room is full');
+      }
+
+      if (this.players.includes(player)) {
+        throw new Error('player is already in this room');
       }
 
       this.players.push(player);

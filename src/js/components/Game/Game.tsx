@@ -7,6 +7,7 @@ import { ModelStatus } from 'models/index';
 import { pagesPath } from 'pages/index';
 import i18n from 'js/i18n';
 import { random } from 'js/helpers';
+import { IRoom } from 'js/server/room';
 
 import Button from 'components/Button';
 import Control from 'components/Control';
@@ -30,17 +31,22 @@ interface IGameStats {
   rowsRemoved: number;
 }
 
+interface IGameProps {
+  onEnd?: () => void;
+  room?: IRoom;
+}
+
 interface IGameState {
-  field: IField;
-  gameOver: boolean;
-  gameShapes: IShape[];
-  shapeControlledIndex: number;
-  stats: IGameStats;
-  timeShapeMove: number;
+  field?: IField;
+  gameOver?: boolean;
+  gameShapes?: IShape[];
+  shapeControlledIndex?: number;
+  stats?: IGameStats;
+  timeShapeMove?: number;
 }
 
 @observer
-export default class Game extends React.Component<{}, IGameState> {
+export default class Game extends React.Component<IGameProps, IGameState> {
   state: IGameState = {
     field: {
       size: { x: 10, y: 20 },
@@ -67,6 +73,10 @@ export default class Game extends React.Component<{}, IGameState> {
     clearTimeout(this.timeoutShapeMove);
   }
 
+  updateState(state: IGameState) {
+    this.setState(state);
+  }
+
   newGame = () => {
     this.setState({
       field: { ...this.state.field, filledCells: {} },
@@ -80,8 +90,14 @@ export default class Game extends React.Component<{}, IGameState> {
   }
 
   gameover = () => {
+    const { onEnd } = this.props;
+
     clearTimeout(this.timeoutShapeMove);
-    this.setState({ gameOver: true });
+    this.updateState({ gameOver: true });
+
+    if (onEnd) {
+      onEnd();
+    }
   }
 
   addNewShape() {
@@ -115,7 +131,7 @@ export default class Game extends React.Component<{}, IGameState> {
       (position) => {
         shape.position = position;
         shapesNew[shapeControlledIndex] = shape;
-        this.setState({ gameShapes: shapesNew });
+        this.updateState({ gameShapes: shapesNew });
       },
       this.gameover,
     );
@@ -141,7 +157,7 @@ export default class Game extends React.Component<{}, IGameState> {
       shape,
       (position) => {
         shape.position = position;
-        this.setState({ gameShapes: shapesNew });
+        this.updateState({ gameShapes: shapesNew });
       },
       () => {
         if (shape.position.y <= 0) {
@@ -223,7 +239,7 @@ export default class Game extends React.Component<{}, IGameState> {
       }
     }
 
-    this.setState({
+    this.updateState({
       field: { ...field, filledCells: newFilledCells },
       stats: { ...stats, rowsRemoved: stats.rowsRemoved + removedRowsCount },
     });
@@ -254,7 +270,7 @@ export default class Game extends React.Component<{}, IGameState> {
       (position) => {
         shape.position = position;
         shapesNew[shapeControlledIndex] = shape;
-        this.setState({ gameShapes: shapesNew });
+        this.updateState({ gameShapes: shapesNew });
       },
       null,
     );

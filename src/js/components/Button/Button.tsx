@@ -37,7 +37,7 @@ const button = (props: IButtonProps) => {
     disabled,
     onClick,
     className: cn(className, 'button', {
-      [`button--${type || 'main'}`]: type,
+      [`button--${type}`]: type,
       [`button--${shape}`]: shape,
       'button--autosize': autosize,
       'button--icon': icon,
