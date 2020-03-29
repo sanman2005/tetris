@@ -1,10 +1,12 @@
 import * as React from 'react';
+import { withRouter, RouteComponentProps } from 'react-router';
 
-import actions from 'api/actions';
+import Actions from 'api/actions';
 import * as apiSocket from 'api/socket';
 import * as apiListeners from 'api/listeners';
 import i18n from 'js/i18n';
 import Constants from 'js/constants';
+import { pagesPath } from 'pages/index';
 
 import Button from 'components/Button';
 import { Form, TFormSubmit } from 'components/Form';
@@ -24,7 +26,7 @@ interface ILobbyState {
   rooms: IRoom[];
 }
 
-export default class Lobby extends React.Component {
+class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
   state: ILobbyState = {
     connected: null,
     creating: false,
@@ -35,14 +37,14 @@ export default class Lobby extends React.Component {
   componentDidMount() {
     apiListeners.addConnectListener(this.onConnect);
     apiListeners.addDisconnectListener(this.onDisconnect);
-    apiListeners.addReceiveListener(actions.lobbyUpdate, this.setRooms);
+    apiListeners.addReceiveListener(Actions.lobbyUpdate, this.setRooms);
     apiSocket.connect();
   }
 
   componentWillUnmount() {
     apiListeners.removeConnectListener(this.onConnect);
     apiListeners.removeDisconnectListener(this.onDisconnect);
-    apiListeners.removeReceiveListener(actions.lobbyUpdate, this.setRooms);
+    apiListeners.removeReceiveListener(Actions.lobbyUpdate, this.setRooms);
   }
 
   onConnect = () => this.setState({ connected: true });
@@ -55,12 +57,16 @@ export default class Lobby extends React.Component {
   setRooms = (rooms: IRoom[]) => this.setState({ rooms });
 
   join = (roomId: string) => {
-    console.log(roomId);
+    apiSocket.send(Actions.roomJoin, { roomId });
+    this.goToGame();
   }
 
   create: TFormSubmit = (data, onSuccessHook, onErrorHook) => {
-    apiSocket.send(actions.roomCreate, { title: data.title });
+    apiSocket.send(Actions.roomCreate, { title: data.title });
+    this.goToGame();
   }
+
+  goToGame = () => this.props.history.push(`${pagesPath.game}/online`);
 
   renderRooms() {
     const { rooms } = this.state;
@@ -133,3 +139,5 @@ export default class Lobby extends React.Component {
     );
   }
 }
+
+export default withRouter(Lobby);

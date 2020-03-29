@@ -57,7 +57,7 @@ class Root extends React.Component<RouteComponentProps & any> {
             theme='login'
             isLast
           />
-          <PageRoute path={pagesPath.game} component={Game} />
+          <PageRoute path={`${pagesPath.game}/:online?`} component={Game} />
           <PageRoute path={pagesPath.logout} component={Logout} />
           <PageRoute path={pagesPath.lobby} component={Lobby} />
           <PageRoute

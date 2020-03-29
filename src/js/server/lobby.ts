@@ -1,8 +1,7 @@
 import * as listeners from 'api/listeners';
-import actions, { TAction } from 'api/actions';
+import Actions, { TAction } from 'api/actions';
 import { createRoom, IRoom, IRoomOptions, IData } from './room';
 import { IPlayer } from './player';
-import Game from '../components/Game';
 
 type TRooms = { [key: string]: IRoom };
 type TPlayers = { [key: string]: IPlayer };
@@ -22,9 +21,9 @@ class Lobby {
   players: TPlayers = {};
 
   constructor() {
-    listeners.addReceiveListener(actions.roomCreate, this.createRoom);
-    listeners.addReceiveListener(actions.roomJoin, this.addPlayerToRoom);
-    listeners.addReceiveListener(actions.roomLeave, this.removePlayerFromRoom);
+    listeners.addReceiveListener(Actions.roomCreate, this.createRoom);
+    listeners.addReceiveListener(Actions.roomJoin, this.addPlayerToRoom);
+    listeners.addReceiveListener(Actions.roomLeave, this.removePlayerFromRoom);
   }
 
   addPlayer = (player: IPlayer) => {
@@ -41,6 +40,11 @@ class Lobby {
     }
 
     delete this.players[player.id];
+
+    if (player.room) {
+      player.room.removePlayer(player);
+      player.changeRoom(null);
+    }
   }
 
   addRoom = (room: IRoom) => {
@@ -60,7 +64,7 @@ class Lobby {
     this.addRoom(room);
     this.addPlayerToRoom({ player, data: { roomId: room.id } });
 
-    new Game({ room, onEnd: () => {} });
+    room.start();
   }
 
   addPlayerToRoom = ({ player, data }: IData<{ roomId: string }>) => {
@@ -103,7 +107,7 @@ class Lobby {
   sendLobby = () => {
     const roomsPublic = this.getPublicRooms();
 
-    this.sendToPlayers(actions.lobbyUpdate, roomsPublic);
+    this.sendToPlayers(Actions.lobbyUpdate, roomsPublic);
   }
 
   sendToPlayers = (action: TAction, data: object) =>

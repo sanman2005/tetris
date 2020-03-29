@@ -5,6 +5,8 @@ enum actions {
   roomCreate,
   roomJoin,
   roomLeave,
+  gameUpdateClient,
+  gameUpdateServer,
 }
 
 export default actions;
