@@ -1,3 +1,5 @@
+import * as React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { v4 as uuid } from 'uuid';
 
 import { IPlayer } from './player';
@@ -19,7 +21,7 @@ export interface IRoom {
   id: string;
   isFull: boolean;
   isEmpty: boolean;
-  game?: { onEnd: () => void; };
+  game?: { onEnd: () => void };
   options: IRoomOptions;
   players: IPlayer[];
   addPlayer: (player: IPlayer) => void;
@@ -69,7 +71,17 @@ export const createRoom = (options: IRoomOptions) => {
       }
     },
     start() {
-      this.game = new Game({ room: this, server: true });
+      const onInit = (onStart: () => void, onEnd: () => void) => {
+        this.game = { onEnd };
+        onStart();
+      };
+      const game = React.createElement(
+        Game,
+        { room: this, server: true, onInit },
+        null,
+      );
+
+      renderToStaticMarkup(game);
     },
   };
 

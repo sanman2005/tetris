@@ -12,7 +12,7 @@ const { port } = serverConfig;
 const wss = new WebSocket.Server({ port });
 
 const logError = (error: Error) => {
-  console.error(error.message);
+  console.error(error);
 };
 
 const sendSocket = (socket: any, action: TAction, data: object) =>
@@ -23,6 +23,7 @@ const sendLobby = (socket: any) =>
 
 wss.on('connection', (socket: WebSocket) => {
   const player = new Player((action, data) => sendSocket(socket, action, data));
+
   const onClose = () => {
     try {
       lobby.removePlayer(player);
@@ -48,6 +49,7 @@ wss.on('connection', (socket: WebSocket) => {
       listeners.notifyReceiveListeners(action, { player, data });
     } catch (e) {
       logError(e);
+      socket.close();
     }
   });
 

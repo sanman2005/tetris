@@ -10,9 +10,9 @@ import Lobby from 'components/Lobby';
 import Login, { Stages } from 'components/Login';
 import Logout from 'components/Logout';
 import Page404 from 'components/NotFound';
-import Game from 'components/Game';
 import Profile from 'components/Profile';
 
+import Game from './game';
 import Home from './home';
 
 import {

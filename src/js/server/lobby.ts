@@ -35,15 +35,14 @@ class Lobby {
   }
 
   removePlayer = (player: IPlayer) => {
-    if (this.players[player.id]) {
+    if (!this.players[player.id]) {
       throw new Error('player with this id does not exists');
     }
 
     delete this.players[player.id];
 
     if (player.room) {
-      player.room.removePlayer(player);
-      player.changeRoom(null);
+      this.removePlayerFromRoom({ player, data: null });
     }
   }
 
@@ -84,11 +83,11 @@ class Lobby {
     this.sendLobby();
   }
 
-  removePlayerFromRoom = ({ player, data }: IData<{ roomId: string }>) => {
-    const room = this.rooms[data.roomId];
+  removePlayerFromRoom = ({ player }: IData) => {
+    const { room } = player;
 
     if (!room) {
-      throw new Error('room does not exist');
+      throw new Error('player has no room');
     }
 
     room.removePlayer(player);

@@ -1,11 +1,7 @@
 import * as React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router';
-import { observer } from 'mobx-react';
 import { v4 as uuid } from 'uuid';
 import cn from 'classnames';
 
-import { ModelStatus } from 'models/index';
-import { pagesPath } from 'pages/index';
 import i18n from 'js/i18n';
 import { random } from 'js/helpers';
 import { IData, IRoom } from 'js/server/room';
@@ -14,13 +10,12 @@ import {
   addReceiveListener,
   removeReceiveListener,
   addDisconnectListener,
+  removeDisconnectListener,
 } from 'js/api/listeners';
 import { send } from 'js/api/socket';
 
 import Button from 'components/Button';
 import Control from 'components/Control';
-import Loading from 'components/Loading';
-import NotFound from 'components/NotFound';
 import { Content } from 'components/Grid';
 
 import Field, { IField } from './Field';
@@ -39,7 +34,9 @@ interface IGameStats {
   rowsRemoved: number;
 }
 
-interface IGameProps extends RouteComponentProps {
+interface IGameProps {
+  onInit?: (onStart: () => void, onEnd: () => void) => void;
+  onBack?: () => void;
   onEnd?: () => void;
   online?: boolean;
   room?: IRoom;
@@ -55,8 +52,7 @@ interface IGameState {
   timeShapeMove?: number;
 }
 
-@observer
-class Game extends React.Component<IGameProps, IGameState> {
+export default class Game extends React.Component<IGameProps, IGameState> {
   state: IGameState = {
     field: {
       size: { x: 10, y: 20 },
@@ -81,6 +77,10 @@ class Game extends React.Component<IGameProps, IGameState> {
     if (props.server) {
       addReceiveListener(Actions.gameUpdateClient, this.sendStateServer);
       addReceiveListener(Actions.gameUpdateServer, this.updateStateServer);
+
+      if (props.onInit) {
+        props.onInit(this.newGame, this.onEnd);
+      }
     }
   }
 
@@ -88,6 +88,7 @@ class Game extends React.Component<IGameProps, IGameState> {
     addReceiveListener(Actions.gameUpdateClient, this.updateState);
 
     if (this.props.online) {
+      addDisconnectListener(this.newGame);
       send(Actions.gameUpdateClient, null);
     } else {
       this.newGame();
@@ -98,8 +99,8 @@ class Game extends React.Component<IGameProps, IGameState> {
     this.onEnd();
   }
 
-  onEnd() {
-    const { onEnd, server } = this.props;
+  onEnd = () => {
+    const { onEnd, online, server } = this.props;
     clearTimeout(this.timeoutShapeMove);
 
     if (server) {
@@ -107,6 +108,10 @@ class Game extends React.Component<IGameProps, IGameState> {
       removeReceiveListener(Actions.gameUpdateServer, this.updateStateServer);
     } else {
       removeReceiveListener(Actions.gameUpdateClient, this.updateState);
+
+      if (online) {
+        removeDisconnectListener(this.newGame);
+      }
     }
 
     if (onEnd) {
@@ -114,30 +119,31 @@ class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
-  updateState(state: IGameState) {
+  updateState = (state: IGameState) => {
     const { server } = this.props;
     const newState = {
       ...this.state,
       ...state,
     };
 
-    this.setState(newState);
-
-    if (!server) {
+    if (server) {
+      this.state = newState;
+    } else {
+      this.setState(newState);
       this.sendState(state);
     }
   }
 
-  updateStateServer({ data }: IData<IGameState>) {
+  updateStateServer = ({ data }: IData<IGameState>) => {
     this.updateState(data);
     this.sendStateServer(data);
   }
 
-  sendState(state = this.state) {
+  sendState = (state = this.state) => {
     send(Actions.gameUpdateServer, state);
   }
 
-  sendStateServer(state = this.state) {
+  sendStateServer = (state = this.state) => {
     const { room } = this.props;
 
     room.players.forEach(player =>
@@ -146,10 +152,10 @@ class Game extends React.Component<IGameProps, IGameState> {
   }
 
   newGame = () => {
-    const { online, history } = this.props;
+    const { online, onBack } = this.props;
 
-    if (online) {
-      history.replace(pagesPath.lobby);
+    if (online && onBack) {
+      onBack();
       return;
     }
 
@@ -175,7 +181,7 @@ class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
-  addNewShape() {
+  addNewShape = () => {
     const { field, gameOver, gameShapes, shapeControlledIndex } = this.state;
 
     if (gameOver) {
@@ -246,7 +252,7 @@ class Game extends React.Component<IGameProps, IGameState> {
     );
   }
 
-  fillFieldCells(shape: IShape) {
+  fillFieldCells = (shape: IShape) => {
     const { field } = this.state;
     const filledCells = { ...field.filledCells };
 
@@ -397,5 +403,3 @@ class Game extends React.Component<IGameProps, IGameState> {
     );
   }
 }
-
-export default withRouter(Game);

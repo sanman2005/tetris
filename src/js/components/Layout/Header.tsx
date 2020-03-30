@@ -110,13 +110,13 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
                 icon={account ? <Icons.profile /> : <Icons.enter />}
                 type='icon-main'
                 shadow
-              />*/}
+              />
               <Button
                 className='header__burger'
                 onClick={this.toggleMenu}
                 icon={<></>}
                 shadow
-              />
+              />*/}
             </div>
 
             <div className='header__menu'>
