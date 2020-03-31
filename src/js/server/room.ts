@@ -35,6 +35,7 @@ export const createRoom = (options: IRoomOptions) => {
   }
 
   options.title = options.title.slice(0, Constants.roomTitleLengthMax);
+  options.playersMax = Math.max(Math.floor(options.playersMax), 2) || 2;
 
   const room: IRoom = {
     id: uuid(),

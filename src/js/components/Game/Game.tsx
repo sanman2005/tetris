@@ -101,19 +101,20 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   componentDidMount() {
-    addReceiveListener(Actions.gameUpdateClient, this.updateState);
+    const { onBack, online } = this.props;
 
-    if (this.props.online) {
+    if (online) {
       if (!isConnected()) {
-        this.newGame();
+        onBack();
         return;
       }
 
-      addDisconnectListener(this.newGame);
+      addReceiveListener(Actions.gameUpdateClient, this.updateState);
+      addDisconnectListener(this.onEnd);
       send(Actions.gameUpdateClient);
-    } else {
-      this.newGame();
     }
+
+    // this.newGame();
   }
 
   componentWillUnmount() {
@@ -122,22 +123,29 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   onEnd = () => {
     const { onEnd, online, server } = this.props;
+
     clearTimeout(this.timeoutShapeMove);
 
     if (server) {
       removeReceiveListener(Actions.gameUpdateClient, this.sendStateServer);
       removeReceiveListener(Actions.gameUpdateServer, this.updateStateServer);
-    } else {
-      removeReceiveListener(Actions.gameUpdateClient, this.updateState);
-
-      if (online) {
-        removeDisconnectListener(this.newGame);
+    } else if (online) {
+      if (isConnected()) {
+        send(Actions.roomLeave);
       }
+
+      removeReceiveListener(Actions.gameUpdateClient, this.updateState);
+      removeDisconnectListener(this.newGame);
     }
 
     if (onEnd) {
       onEnd();
     }
+  }
+
+  onExit = () => {
+    this.onEnd();
+    this.props.onBack();
   }
 
   onPlayerAdd = (id: string) => {
@@ -162,6 +170,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     if (server) {
       this.state = newState;
+      this.sendStateServer();
     } else {
       this.setState(newState);
     }
@@ -192,16 +201,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   newGame = () => {
-    const { online, onBack, server } = this.props;
-
-    if (online && onBack) {
-      if (isConnected()) {
-        send(Actions.roomLeave);
-      }
-
-      onBack();
-      return;
-    }
+    const { online, server } = this.props;
 
     this.updateState({
       field: { ...this.state.field, filledCells: {} },
@@ -210,10 +210,11 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         rowsRemoved: 0,
       },
     });
+
     this.moveShapesOnTimer();
 
-    if (server) {
-      this.addNewShape(MY_SHAPE_INDEX);
+    if (!server && !online) {
+      this.addNewShape();
     }
   }
 
@@ -276,12 +277,18 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   move = (direction: IVector, shapeIndex = MY_SHAPE_INDEX) => {
     const { online } = this.props;
+
+    if (online) {
+      this.sendState({ direction });
+      return;
+    }
+
     const { field, gameShapes } = this.state;
     const shapesNew = { ...gameShapes };
     const shape = shapesNew[shapeIndex];
     const shapeNewPosition = {
-      x: shape.position.x + Math.max(Math.floor(direction.x), 1),
-      y: shape.position.y + Math.max(Math.floor(direction.y), 1),
+      x: shape.position.x + Math.max(0, Math.min(Math.floor(direction.x), 1)),
+      y: shape.position.y + Math.max(0, Math.min(Math.floor(direction.y), 1)),
     };
 
     correctShapeFieldPosition(
@@ -292,10 +299,6 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       (position) => {
         shape.position = position;
         this.updateState({ gameShapes: shapesNew });
-
-        if (online) {
-          this.sendState({ direction });
-        }
       },
       () => {
         if (shape.position.y <= 0) {
@@ -304,7 +307,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         }
 
         this.fillFieldCells(shape);
-        this.addNewShape();
+        this.addNewShape(shapeIndex);
       },
     );
   }
@@ -384,16 +387,21 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   moveShapesOnTimer = () => {
-    const shapesKeys = Object.keys(this.state.gameShapes);
-
     this.timeoutShapeMove = setTimeout(() => {
-      shapesKeys.forEach(key => this.moveDown(key));
+      Object.keys(this.state.gameShapes).forEach(key => this.moveDown(key));
+
       this.moveShapesOnTimer();
     }, this.state.timeShapeMove * 1000);
   }
 
   rotate = (shapeIndex = MY_SHAPE_INDEX, angle = 90) => {
     const { online } = this.props;
+
+    if (online) {
+      this.sendState({ angle });
+      return;
+    }
+
     const { field, gameShapes } = this.state;
     const shapesNew = { ...gameShapes };
     const shape = { ...shapesNew[shapeIndex] };
@@ -417,7 +425,15 @@ export default class Game extends React.Component<IGameProps, IGameState> {
           this.sendState({ angle });
         }
       },
-      null,
+      () => {
+        if (shape.position.y <= 0) {
+          this.gameover();
+          return;
+        }
+
+        this.fillFieldCells(shape);
+        this.addNewShape(shapeIndex);
+      },
     );
   }
 
@@ -469,7 +485,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
             className='game__exit'
             text={i18n`exit`}
             type='light'
-            onClick={this.newGame}
+            onClick={this.onExit}
           />
         )}
       </Content>
