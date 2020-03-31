@@ -29,13 +29,26 @@ import {
 const CELL_SIZE = 30;
 const TIME_SHAPE_MOVE_MAX = 1;
 const TIME_KEY_HANDLER_DELAY = 0.05;
+const MY_SHAPE_INDEX = 'my';
+
+export interface IGame {
+  start: () => void;
+  end: () => void;
+  playerAdd: (id: string) => void;
+  playerRemove: (id: string) => void;
+}
+
+interface IGameControl {
+  direction?: IVector;
+  angle?: number;
+}
 
 interface IGameStats {
   rowsRemoved: number;
 }
 
 interface IGameProps {
-  onInit?: (onStart: () => void, onEnd: () => void) => void;
+  onInit?: (handlers: IGame) => void;
   onBack?: () => void;
   onEnd?: () => void;
   online?: boolean;
@@ -46,8 +59,7 @@ interface IGameProps {
 interface IGameState {
   field?: IField;
   gameOver?: boolean;
-  gameShapes?: IShape[];
-  shapeControlledIndex?: number;
+  gameShapes?: { [key: string]: IShape };
   stats?: IGameStats;
   timeShapeMove?: number;
 }
@@ -59,8 +71,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       filledCells: {},
     },
     gameOver: false,
-    gameShapes: [null],
-    shapeControlledIndex: 0,
+    gameShapes: {},
     stats: {
       rowsRemoved: 0,
     },
@@ -79,7 +90,12 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       addReceiveListener(Actions.gameUpdateServer, this.updateStateServer);
 
       if (props.onInit) {
-        props.onInit(this.newGame, this.onEnd);
+        props.onInit({
+          start: this.newGame,
+          end: this.onEnd,
+          playerAdd: this.onPlayerAdd,
+          playerRemove: this.onPlayerRemove,
+        });
       }
     }
   }
@@ -124,6 +140,19 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
+  onPlayerAdd = (id: string) => {
+    this.addNewShape(id);
+  }
+
+  onPlayerRemove = (id: string) => {
+    const { gameShapes } = this.state;
+    const newShapes = { ...gameShapes };
+
+    delete newShapes[id];
+
+    this.updateState({ gameShapes: newShapes });
+  }
+
   updateState = (state: IGameState) => {
     const { server } = this.props;
     const newState = {
@@ -135,18 +164,24 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       this.state = newState;
     } else {
       this.setState(newState);
-      this.sendState(state);
     }
   }
 
-  updateStateServer = ({ data }: IData<IGameState>) => {
-    // this.updateState(data);
+  updateStateServer = ({ player, data }: IData<IGameControl>) => {
+    const { angle, direction } = data;
+
+    if (angle) {
+      this.rotate(player.id);
+    }
+
+    if (direction) {
+      this.move(direction, player.id);
+    }
+
     this.sendStateServer();
   }
 
-  sendState = (state = this.state) => {
-    send(Actions.gameUpdateServer, state);
-  }
+  sendState = (data: IGameControl) => send(Actions.gameUpdateServer, data);
 
   sendStateServer = () => {
     const { room } = this.props;
@@ -157,7 +192,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   newGame = () => {
-    const { online, onBack } = this.props;
+    const { online, onBack, server } = this.props;
 
     if (online && onBack) {
       if (isConnected()) {
@@ -175,8 +210,11 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         rowsRemoved: 0,
       },
     });
-    this.addNewShape();
-    this.moveShapeOnTimer();
+    this.moveShapesOnTimer();
+
+    if (server) {
+      this.addNewShape(MY_SHAPE_INDEX);
+    }
   }
 
   gameover = () => {
@@ -190,14 +228,14 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
-  addNewShape = () => {
-    const { field, gameOver, gameShapes, shapeControlledIndex } = this.state;
+  addNewShape = (shapeIndex = MY_SHAPE_INDEX) => {
+    const { field, gameOver, gameShapes } = this.state;
 
     if (gameOver) {
       return;
     }
 
-    const shapesNew = [...gameShapes];
+    const shapesNew = { ...gameShapes };
     const allShapes = Object.values(shapes);
     const randomShapeCells = [...allShapes[random(allShapes.length)]];
     const randomAngle = random(4) * 90;
@@ -220,24 +258,30 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       shape,
       (position) => {
         shape.position = position;
-        shapesNew[shapeControlledIndex] = shape;
+        shapesNew[shapeIndex] = shape;
         this.updateState({ gameShapes: shapesNew });
       },
       this.gameover,
     );
   }
 
-  moveLeft = () => this.move({ x: -1, y: 0 });
-  moveRight = () => this.move({ x: 1, y: 0 });
-  moveDown = () => this.move({ x: 0, y: 1 });
+  moveLeft = (shapeIndex = MY_SHAPE_INDEX) =>
+    this.move({ x: -1, y: 0 }, shapeIndex)
 
-  move = (direction: IVector) => {
-    const { field, gameShapes, shapeControlledIndex } = this.state;
-    const shapesNew = [...gameShapes];
-    const shape = shapesNew[shapeControlledIndex];
+  moveRight = (shapeIndex = MY_SHAPE_INDEX) =>
+    this.move({ x: 1, y: 0 }, shapeIndex)
+
+  moveDown = (shapeIndex = MY_SHAPE_INDEX) =>
+    this.move({ x: 0, y: 1 }, shapeIndex)
+
+  move = (direction: IVector, shapeIndex = MY_SHAPE_INDEX) => {
+    const { online } = this.props;
+    const { field, gameShapes } = this.state;
+    const shapesNew = { ...gameShapes };
+    const shape = shapesNew[shapeIndex];
     const shapeNewPosition = {
-      x: shape.position.x + direction.x,
-      y: shape.position.y + direction.y,
+      x: shape.position.x + Math.max(Math.floor(direction.x), 1),
+      y: shape.position.y + Math.max(Math.floor(direction.y), 1),
     };
 
     correctShapeFieldPosition(
@@ -248,6 +292,10 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       (position) => {
         shape.position = position;
         this.updateState({ gameShapes: shapesNew });
+
+        if (online) {
+          this.sendState({ direction });
+        }
       },
       () => {
         if (shape.position.y <= 0) {
@@ -335,17 +383,20 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     });
   }
 
-  moveShapeOnTimer = () => {
+  moveShapesOnTimer = () => {
+    const shapesKeys = Object.keys(this.state.gameShapes);
+
     this.timeoutShapeMove = setTimeout(() => {
-      this.moveDown();
-      this.moveShapeOnTimer();
+      shapesKeys.forEach(key => this.moveDown(key));
+      this.moveShapesOnTimer();
     }, this.state.timeShapeMove * 1000);
   }
 
-  rotate = (angle = 90) => {
-    const { field, gameShapes, shapeControlledIndex } = this.state;
-    const shapesNew = [...gameShapes];
-    const shape = { ...shapesNew[shapeControlledIndex] };
+  rotate = (shapeIndex = MY_SHAPE_INDEX, angle = 90) => {
+    const { online } = this.props;
+    const { field, gameShapes } = this.state;
+    const shapesNew = { ...gameShapes };
+    const shape = { ...shapesNew[shapeIndex] };
 
     shape.cells = [...shape.cells].map(cell => ({
       ...cell,
@@ -359,8 +410,12 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       shape,
       (position) => {
         shape.position = position;
-        shapesNew[shapeControlledIndex] = shape;
+        shapesNew[shapeIndex] = shape;
         this.updateState({ gameShapes: shapesNew });
+
+        if (online) {
+          this.sendState({ angle });
+        }
       },
       null,
     );
@@ -396,7 +451,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       <Content className={cn('game', { 'game--over': gameOver })}>
         <Control onKeyDown={this.onKeyDown} />
         <Field {...field} cellSize={CELL_SIZE}>
-          {gameShapes.map(
+          {Object.values(gameShapes).map(
             shape =>
               shape && <Shape key={shape.id} cellSize={CELL_SIZE} {...shape} />,
           )}

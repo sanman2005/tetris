@@ -5,7 +5,8 @@ interface IControlProps {
 }
 
 export default class Control extends React.Component<IControlProps> {
-  onKeyDown = (event: { code: string }) => {
+  onKeyDown = (event: KeyboardEvent) => {
+    event.stopPropagation();
     this.props.onKeyDown(event.code);
   }
 

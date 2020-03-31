@@ -61,9 +61,8 @@ class Lobby {
     const room = createRoom(data);
 
     this.addRoom(room);
-    this.addPlayerToRoom({ player, data: { roomId: room.id } });
-
     room.start();
+    this.addPlayerToRoom({ player, data: { roomId: room.id } });
   }
 
   addPlayerToRoom = ({ player, data }: IData<{ roomId: string }>) => {

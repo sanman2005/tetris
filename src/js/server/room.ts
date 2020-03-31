@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 
 import { IPlayer } from './player';
 import Constants from 'js/constants';
-import Game from '../components/Game';
+import Game, { IGame } from '../components/Game';
 
 export interface IData<T = object> {
   player: IPlayer;
@@ -21,7 +21,7 @@ export interface IRoom {
   id: string;
   isFull: boolean;
   isEmpty: boolean;
-  game?: { onEnd: () => void };
+  game?: IGame;
   options: IRoomOptions;
   players: IPlayer[];
   addPlayer: (player: IPlayer) => void;
@@ -56,6 +56,7 @@ export const createRoom = (options: IRoomOptions) => {
       }
 
       this.players.push(player);
+      this.game.playerAdd(player.id);
     },
     removePlayer(player) {
       const playerIndex = this.players.indexOf(player);
@@ -65,15 +66,16 @@ export const createRoom = (options: IRoomOptions) => {
       }
 
       this.players.splice(playerIndex, 1);
+      this.game.playerRemove(player.id);
 
       if (this.isEmpty) {
-        this.game.onEnd();
+        this.game.end();
       }
     },
     start() {
-      const onInit = (onStart: () => void, onEnd: () => void) => {
-        this.game = { onEnd };
-        onStart();
+      const onInit = (game: IGame) => {
+        this.game = game;
+        game.start();
       };
       const game = React.createElement(
         Game,
