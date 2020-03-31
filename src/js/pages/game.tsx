@@ -4,13 +4,13 @@ import { withRouter, RouteComponentProps } from 'react-router';
 import Game from 'components/Game';
 import { pagesPath } from './';
 
-interface IGamePage extends RouteComponentProps {
+interface IGamePage {
   online?: string;
 }
 
-export default withRouter((props: IGamePage) => (
+export default withRouter((props: RouteComponentProps<IGamePage>) => (
   <Game
-    online={!!props.online}
+    online={!!props.match.params.online}
     onBack={() => props.history.replace(pagesPath.lobby)}
   />
 ));

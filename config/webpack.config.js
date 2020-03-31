@@ -120,11 +120,9 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     host: '0.0.0.0',
-    hot: true,
+    hot: !isServer,
     open: !isServer,
     overlay: true,
-    pfx: './certificate/localhost.pfx',
-    pfxPassphrase: 'localhost',
     port: localPort,
     publicPath: '/',
     public: `localhost:${localPort}`,

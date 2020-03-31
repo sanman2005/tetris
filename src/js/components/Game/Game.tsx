@@ -12,7 +12,7 @@ import {
   addDisconnectListener,
   removeDisconnectListener,
 } from 'js/api/listeners';
-import { send } from 'js/api/socket';
+import { isConnected, send } from 'js/api/socket';
 
 import Button from 'components/Button';
 import Control from 'components/Control';
@@ -88,8 +88,13 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     addReceiveListener(Actions.gameUpdateClient, this.updateState);
 
     if (this.props.online) {
+      if (!isConnected()) {
+        this.newGame();
+        return;
+      }
+
       addDisconnectListener(this.newGame);
-      send(Actions.gameUpdateClient, null);
+      send(Actions.gameUpdateClient);
     } else {
       this.newGame();
     }
@@ -135,19 +140,19 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   updateStateServer = ({ data }: IData<IGameState>) => {
-    this.updateState(data);
-    this.sendStateServer(data);
+    // this.updateState(data);
+    this.sendStateServer();
   }
 
   sendState = (state = this.state) => {
     send(Actions.gameUpdateServer, state);
   }
 
-  sendStateServer = (state = this.state) => {
+  sendStateServer = () => {
     const { room } = this.props;
 
     room.players.forEach(player =>
-      player.send(Actions.gameUpdateClient, state || this.state),
+      player.send(Actions.gameUpdateClient, this.state),
     );
   }
 
@@ -155,11 +160,15 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const { online, onBack } = this.props;
 
     if (online && onBack) {
+      if (isConnected()) {
+        send(Actions.roomLeave);
+      }
+
       onBack();
       return;
     }
 
-    this.setState({
+    this.updateState({
       field: { ...this.state.field, filledCells: {} },
       gameOver: false,
       stats: {
@@ -380,6 +389,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   render() {
+    const { online } = this.props;
     const { field, gameOver, gameShapes, stats } = this.state;
 
     return (
@@ -399,6 +409,14 @@ export default class Game extends React.Component<IGameProps, IGameState> {
           {i18n`gameOver`}
           <Button text={i18n`newGame`} type='main' onClick={this.newGame} />
         </div>
+        {online && (
+          <Button
+            className='game__exit'
+            text={i18n`exit`}
+            type='light'
+            onClick={this.newGame}
+          />
+        )}
       </Content>
     );
   }

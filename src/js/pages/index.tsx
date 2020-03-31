@@ -49,13 +49,12 @@ class Root extends React.Component<RouteComponentProps & any> {
   render() {
     return (
       <Layout key={getLang()}>
-        <PageManager key={this.props.location.pathname}>
-          <PageRoute path='/' exact component={Home} isLast />
+        <PageManager key={this.props.location.pathname} isLast>
+          <PageRoute path='/' exact component={Home} />
           <PageRoute
             path={`${pagesPath.login}/:stage?`}
             component={Login}
             theme='login'
-            isLast
           />
           <PageRoute path={`${pagesPath.game}/:online?`} component={Game} />
           <PageRoute path={pagesPath.logout} component={Logout} />
@@ -63,10 +62,9 @@ class Root extends React.Component<RouteComponentProps & any> {
           <PageRoute
             path={pagesPath.profile}
             component={Profile}
-            isLast
             needAuth
           />
-          <PageRoute component={Page404} theme='page404' isLast />
+          <PageRoute component={Page404} theme='page404' />
         </PageManager>
       </Layout>
     );

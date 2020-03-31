@@ -19,6 +19,7 @@ export default {
   disconnect: 'нет связи с сервером',
   emailFormat: 'Email должен быть в формате email@example.com',
   enter: 'введите',
+  exit: 'выход',
   failed: 'не удалось',
   fetchListError: 'не удалось получить список',
   fieldLettersOnly: 'поле может содержать только буквы и пробелы',

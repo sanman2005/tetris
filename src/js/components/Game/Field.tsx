@@ -20,17 +20,17 @@ export default ({ cellSize, children, filledCells, size }: IFieldProps) => (
     style={{
       width: `${size.x * cellSize}px`,
       height: `${size.y * cellSize}px`,
-      backgroundSize: `${cellSize}px ${cellSize}px`,
+      backgroundSize: `${100 / size.x}% ${100 / size.y}%`,
     }}
   >
     <div
       className='field__cells'
       style={{
-        width: `${cellSize}px`,
-        height: `${cellSize}px`,
+        width: `${100 / size.x}%`,
+        height: `${100 / size.y}%`,
       }}
     >
-      {Object.values(filledCells).map((cell, index) => cell && (
+      {Object.values(filledCells).map(cell => cell && (
         <Cell offset={cell} key={cell.id} />
       ))}
     </div>

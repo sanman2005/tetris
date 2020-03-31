@@ -18,45 +18,45 @@ const logError = (error: Error) => {
 const sendSocket = (socket: any, action: TAction, data: object) =>
   socket.send(JSON.stringify({ action, data }));
 
-const sendLobby = (socket: any) =>
-  sendSocket(socket, Actions.lobbyUpdate, lobby.getPublicRooms());
-
 wss.on('connection', (socket: WebSocket) => {
   const player = new Player((action, data) => sendSocket(socket, action, data));
 
   const onClose = () => {
     try {
-      lobby.removePlayer(player);
+      if (socket.OPEN) {
+        socket.close();
+      } else {
+        lobby.removePlayer(player);
+      }
     } catch (e) {
       logError(e);
     }
   };
 
   socket.on('close', onClose);
-
-  socket.on('error', () => {
-    if (socket.OPEN) {
-      socket.close();
-    }
-
-    onClose();
-  });
+  socket.on('error', onClose);
 
   socket.on('message', (message: string) => {
     try {
       const { action, data } = JSON.parse(message);
 
+      if (action === Actions.roomLeave) {
+        onClose();
+        return;
+      }
+
       listeners.notifyReceiveListeners(action, { player, data });
     } catch (e) {
       logError(e);
-      socket.close();
+      onClose();
     }
   });
 
   try {
     lobby.addPlayer(player);
-    sendLobby(socket);
+    player.send(Actions.lobbyUpdate, lobby.getPublicRooms());
   } catch (e) {
     logError(e);
+    socket.close();
   }
 });
