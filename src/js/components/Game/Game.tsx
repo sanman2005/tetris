@@ -161,7 +161,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     this.updateState({ gameShapes: newShapes });
   }
 
-  updateState = (state: IGameState) => {
+  updateState = (state: IGameState, callback?: () => void) => {
     const { server } = this.props;
     const newState = {
       ...this.state,
@@ -171,8 +171,12 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     if (server) {
       this.state = newState;
       this.sendStateServer();
+
+      if (callback) {
+        callback();
+      }
     } else {
-      this.setState(newState);
+      this.setState(newState, callback);
     }
   }
 
@@ -287,7 +291,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const shapesNew = { ...gameShapes };
     const shape = shapesNew[shapeIndex];
     const shapeNewPosition = {
-      x: shape.position.x + Math.max(0, Math.min(Math.floor(direction.x), 1)),
+      x: shape.position.x + Math.max(-1, Math.min(Math.floor(direction.x), 1)),
       y: shape.position.y + Math.max(0, Math.min(Math.floor(direction.y), 1)),
     };
 
@@ -328,7 +332,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       };
     });
 
-    this.setState(
+    this.updateState(
       {
         field: {
           ...field,
