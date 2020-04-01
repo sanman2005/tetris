@@ -1,4 +1,5 @@
 import * as React from 'react';
+import cn from 'classnames';
 
 import Cell, { ICell } from './Cell';
 import { getPositionKey } from './GameHelpers';
@@ -8,10 +9,17 @@ export interface IVector {
   y: number;
 }
 
+export enum Colors {
+  blue = 'blue',
+  red = 'red',
+  yellow = 'yellow',
+}
+
 export interface IShape {
   id?: string;
   position?: IVector;
   cells: ICell[];
+  color?: Colors;
 }
 
 export interface IShapeProps extends IShape {
@@ -63,9 +71,9 @@ export const shapes: { [key: string]: ICell[] } = {
   ],
 };
 
-export default ({ cellSize, position, cells }: IShapeProps) => (
+export default ({ cellSize, cells, color, position }: IShapeProps) => (
   <div
-    className='shape'
+    className={cn('shape', { [`shape--${color}`]: color })}
     style={{
       width: `${cellSize}px`,
       height: `${cellSize}px`,

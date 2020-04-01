@@ -1,6 +1,21 @@
+shapeColor($color)
+  filter drop-shadow(1px 1px 3px $color)
+
+  .cell
+    background-color $color
+
 .shape
   position absolute
   left 0
   top 0
-  filter drop-shadow(1px 1px 3px $colorMain1)
   transition()
+
+  &
+  &--blue
+    shapeColor($colorMain1)
+
+  &--red
+    shapeColor($colorRed2)
+
+  &--yellow
+    shapeColor($colorYellow)

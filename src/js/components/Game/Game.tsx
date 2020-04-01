@@ -7,10 +7,10 @@ import { random } from 'js/helpers';
 import { IData, IRoom } from 'js/server/room';
 import Actions from 'js/api/actions';
 import {
-  addReceiveListener,
-  removeReceiveListener,
   addDisconnectListener,
+  addReceiveListener,
   removeDisconnectListener,
+  removeReceiveListener,
 } from 'js/api/listeners';
 import { isConnected, send } from 'js/api/socket';
 
@@ -19,17 +19,14 @@ import Control from 'components/Control';
 import { Content } from 'components/Grid';
 
 import Field, { IField } from './Field';
-import Shape, { IShape, IVector, shapes } from './Shape';
-import {
-  correctShapeFieldPosition,
-  getPositionKey,
-  pointRotate,
-} from './GameHelpers';
+import Shape, { Colors, IShape, IVector, shapes } from './Shape';
+import { correctShapeFieldPosition, getPositionKey, pointRotate } from './GameHelpers';
 
 const CELL_SIZE = 30;
 const TIME_SHAPE_MOVE_MAX = 1;
 const TIME_KEY_HANDLER_DELAY = 0.05;
 const MY_SHAPE_INDEX = 'my';
+const COLORS_ORDER = [Colors.blue, Colors.yellow, Colors.red];
 
 export interface IGame {
   start: () => void;
@@ -242,10 +239,13 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     const shapesNew = { ...gameShapes };
     const allShapes = Object.values(shapes);
+    const gameShapesCount = Object.values(gameShapes).length;
     const randomShapeCells = [...allShapes[random(allShapes.length)]];
     const randomAngle = random(4) * 90;
+    const color = shapesNew[shapeIndex] ? shapesNew[shapeIndex].color : COLORS_ORDER[gameShapesCount];
     const shape: IShape = {
       id: uuid(),
+      color,
       cells: randomShapeCells.map(cell => ({
         ...cell,
         offset: pointRotate(cell.offset, randomAngle),
