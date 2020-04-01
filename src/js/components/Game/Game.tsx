@@ -47,7 +47,6 @@ interface IGameStats {
 interface IGameProps {
   onInit?: (handlers: IGame) => void;
   onBack?: () => void;
-  onEnd?: () => void;
   online?: boolean;
   room?: IRoom;
   server?: boolean;
@@ -61,19 +60,21 @@ interface IGameState {
   timeShapeMove?: number;
 }
 
+const INITIAL_STATE: IGameState = {
+  field: {
+    size: { x: 10, y: 20 },
+    filledCells: {},
+  },
+  gameOver: false,
+  gameShapes: {},
+  stats: {
+    rowsRemoved: 0,
+  },
+  timeShapeMove: TIME_SHAPE_MOVE_MAX,
+};
+
 export default class Game extends React.Component<IGameProps, IGameState> {
-  state: IGameState = {
-    field: {
-      size: { x: 10, y: 20 },
-      filledCells: {},
-    },
-    gameOver: false,
-    gameShapes: {},
-    stats: {
-      rowsRemoved: 0,
-    },
-    timeShapeMove: TIME_SHAPE_MOVE_MAX,
-  };
+  state = { ...INITIAL_STATE };
 
   timeoutShapeMove: NodeJS.Timeout = null;
 
@@ -109,9 +110,9 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       addReceiveListener(Actions.gameUpdateClient, this.updateState);
       addDisconnectListener(this.onEnd);
       send(Actions.gameUpdateClient);
+    } else {
+      this.newGame();
     }
-
-    // this.newGame();
   }
 
   componentWillUnmount() {
@@ -119,7 +120,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   onEnd = () => {
-    const { onEnd, online, server } = this.props;
+    const { online, server } = this.props;
 
     clearTimeout(this.timeoutShapeMove);
 
@@ -133,10 +134,6 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
       removeReceiveListener(Actions.gameUpdateClient, this.updateState);
       removeDisconnectListener(this.newGame);
-    }
-
-    if (onEnd) {
-      onEnd();
     }
   }
 
@@ -178,14 +175,21 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   updateStateServer = ({ player, data }: IData<IGameControl>) => {
+    const { gameShapes } = this.state;
+    const shapeIndex = player.id;
+
+    if (!gameShapes[shapeIndex]) {
+      return;
+    }
+
     const { angle, direction } = data;
 
     if (angle) {
-      this.rotate(player.id);
+      this.rotate(shapeIndex);
     }
 
     if (direction) {
-      this.move(direction, player.id);
+      this.move(direction, shapeIndex);
     }
 
     this.sendStateServer();
@@ -205,11 +209,8 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const { online, server } = this.props;
 
     this.updateState({
+      ...INITIAL_STATE,
       field: { ...this.state.field, filledCells: {} },
-      gameOver: false,
-      stats: {
-        rowsRemoved: 0,
-      },
     });
 
     this.moveShapesOnTimer();
@@ -220,14 +221,8 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   gameover = () => {
-    const { onEnd } = this.props;
-
     clearTimeout(this.timeoutShapeMove);
     this.updateState({ gameOver: true });
-
-    if (onEnd) {
-      onEnd();
-    }
   }
 
   addNewShape = (shapeIndex = MY_SHAPE_INDEX) => {
@@ -238,11 +233,17 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
 
     const shapesNew = { ...gameShapes };
-    const allShapes = Object.values(shapes);
-    const gameShapesCount = Object.values(gameShapes).length;
-    const randomShapeCells = [...allShapes[random(allShapes.length)]];
+    const shapeOld = shapesNew[shapeIndex];
+
+    delete shapesNew[shapeIndex];
+
+    const shapeTemplates = Object.values(shapes);
+    const allGameShapes = Object.values(shapesNew);
+    const gameShapesCount = allGameShapes.length;
+    const randomShapeCells = [...shapeTemplates[random(shapeTemplates.length)]];
     const randomAngle = random(4) * 90;
-    const color = shapesNew[shapeIndex] ? shapesNew[shapeIndex].color : COLORS_ORDER[gameShapesCount];
+    const color = shapeOld ? shapeOld.color : COLORS_ORDER[gameShapesCount];
+
     const shape: IShape = {
       id: uuid(),
       color,
@@ -261,6 +262,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       { x: shape.position.x, y: -1 },
       field,
       shape,
+      allGameShapes,
       (position) => {
         shape.position = position;
         shapesNew[shapeIndex] = shape;
@@ -288,6 +290,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
 
     const { field, gameShapes } = this.state;
+    const allGameShapes = Object.values(gameShapes);
     const shapesNew = { ...gameShapes };
     const shape = shapesNew[shapeIndex];
     const shapeNewPosition = {
@@ -300,16 +303,47 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       shape.position,
       field,
       shape,
+      allGameShapes,
       (position) => {
         shape.position = position;
         this.updateState({ gameShapes: shapesNew });
       },
       () => {
-        if (shape.position.y <= 0) {
-          this.gameover();
-          return;
-        }
+        this.fillFieldCells(shape);
+        this.addNewShape(shapeIndex);
+      },
+    );
+  }
 
+  rotate = (shapeIndex = MY_SHAPE_INDEX, angle = 90) => {
+    const { online } = this.props;
+
+    if (online) {
+      this.sendState({ angle });
+      return;
+    }
+
+    const { field, gameShapes } = this.state;
+    const allGameShapes = Object.values(gameShapes);
+    const shapesNew = { ...gameShapes };
+    const shape = shapesNew[shapeIndex];
+
+    shape.cells = [...shape.cells].map(cell => ({
+      ...cell,
+      offset: pointRotate(cell.offset, angle),
+    }));
+
+    correctShapeFieldPosition(
+      shape.position,
+      shape.position,
+      field,
+      shape,
+      allGameShapes,
+      (position) => {
+        shape.position = position;
+        this.updateState({ gameShapes: shapesNew });
+      },
+      () => {
         this.fillFieldCells(shape);
         this.addNewShape(shapeIndex);
       },
@@ -325,8 +359,9 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         x: shape.position.x + cell.offset.x,
         y: shape.position.y + cell.offset.y,
       };
+      const cellKey = getPositionKey(cellPosition);
 
-      filledCells[getPositionKey(cellPosition)] = {
+      filledCells[cellKey] = {
         ...cellPosition,
         id: uuid(),
       };
@@ -396,49 +431,6 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
       this.moveShapesOnTimer();
     }, this.state.timeShapeMove * 1000);
-  }
-
-  rotate = (shapeIndex = MY_SHAPE_INDEX, angle = 90) => {
-    const { online } = this.props;
-
-    if (online) {
-      this.sendState({ angle });
-      return;
-    }
-
-    const { field, gameShapes } = this.state;
-    const shapesNew = { ...gameShapes };
-    const shape = { ...shapesNew[shapeIndex] };
-
-    shape.cells = [...shape.cells].map(cell => ({
-      ...cell,
-      offset: pointRotate(cell.offset, angle),
-    }));
-
-    correctShapeFieldPosition(
-      shape.position,
-      shape.position,
-      field,
-      shape,
-      (position) => {
-        shape.position = position;
-        shapesNew[shapeIndex] = shape;
-        this.updateState({ gameShapes: shapesNew });
-
-        if (online) {
-          this.sendState({ angle });
-        }
-      },
-      () => {
-        if (shape.position.y <= 0) {
-          this.gameover();
-          return;
-        }
-
-        this.fillFieldCells(shape);
-        this.addNewShape(shapeIndex);
-      },
-    );
   }
 
   onKeyDown = (key: string) => {

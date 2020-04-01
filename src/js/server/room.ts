@@ -56,18 +56,21 @@ export const createRoom = (options: IRoomOptions) => {
         throw new Error('player is already in this room');
       }
 
+      player.changeRoom(room);
       this.players.push(player);
       this.game.playerAdd(player.id);
     },
     removePlayer(player) {
+      console.log(this);
       const playerIndex = this.players.indexOf(player);
 
       if (playerIndex < 0) {
         throw new Error('player was not found in room');
       }
 
-      this.players.splice(playerIndex, 1);
       this.game.playerRemove(player.id);
+      this.players.splice(playerIndex, 1);
+      player.changeRoom(null);
 
       if (this.isEmpty) {
         this.game.end();
@@ -78,13 +81,14 @@ export const createRoom = (options: IRoomOptions) => {
         this.game = game;
         game.start();
       };
-      const game = React.createElement(
+
+      const gameElement = React.createElement(
         Game,
         { room: this, server: true, onInit },
         null,
       );
 
-      renderToStaticMarkup(game);
+      renderToStaticMarkup(gameElement);
     },
   };
 

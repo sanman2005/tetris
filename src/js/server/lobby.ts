@@ -32,6 +32,7 @@ class Lobby {
     }
 
     this.players[player.id] = player;
+    player.send(Actions.lobbyUpdate, this.getPublicRooms());
   }
 
   removePlayer = (player: IPlayer) => {
@@ -77,8 +78,6 @@ class Lobby {
     }
 
     room.addPlayer(player);
-    player.changeRoom(room);
-
     this.sendLobby();
   }
 
@@ -90,8 +89,6 @@ class Lobby {
     }
 
     room.removePlayer(player);
-    player.changeRoom(null);
-    delete this.players[player.id];
 
     if (room.isEmpty) {
       delete this.roomsPublic[room.id];

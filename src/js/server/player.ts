@@ -21,7 +21,7 @@ export default class Player {
     this.send = send;
   }
 
-  changeRoom(room: IRoom) {
+  changeRoom = (room: IRoom) => {
     this.room = room;
   }
 }

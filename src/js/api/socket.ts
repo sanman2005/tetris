@@ -9,19 +9,22 @@ const apiPort: number = apiConfig.port;
 let ws: WebSocket = null;
 
 export const connect = () => {
-  if (ws && [ws.CONNECTING, ws.OPEN, ws.CLOSING].includes(ws.readyState)) {
+  if (ws && ws.readyState !== ws.CLOSED) {
     return;
   }
 
   ws = new WebSocket(`${apiHost}:${apiPort}`);
 
-  ws.onopen = () => {
-    listeners.notifyConnectListeners();
+  window.onbeforeunload = function() {
+    ws.onclose = () => null;
+    ws.close();
   };
 
+  ws.onopen = () => listeners.notifyConnectListeners();
+
   ws.onclose = () => {
-    listeners.notifyDisconnectListeners();
     ws = null;
+    listeners.notifyDisconnectListeners();
   };
 
   ws.onmessage = ({ data: rawData }) => {

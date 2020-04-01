@@ -1,11 +1,80 @@
 import { IShape, IVector } from './Shape';
 import { IField } from './Field';
 
+const checkShapeCellsPosition = (
+  position: IVector,
+  cells: { [key: string]: IVector },
+  shape: IShape,
+  onSuccess: () => void,
+  onFail?: () => void,
+) => {
+  for (let i = 0; i < shape.cells.length; i++) {
+    const cell = shape.cells[i];
+    const cellPosition = {
+      x: position.x + cell.offset.x,
+      y: position.y + cell.offset.y,
+    };
+
+    if (cells[getPositionKey(cellPosition)]) {
+      if (onFail) {
+        onFail();
+      }
+
+      return;
+    }
+  }
+
+  onSuccess();
+};
+
+const checkShapesPositionConflict = (
+  position: IVector,
+  shape: IShape,
+  shapes: IShape[],
+  onSuccess: (position: IVector) => void,
+) => {
+  const shapeCells = shape.cells.reduce(
+    (result: { [key: string]: IVector }, cell) => {
+      const cellPosition = {
+        x: position.x + cell.offset.x,
+        y: position.y + cell.offset.y,
+      };
+
+      result[getPositionKey(cellPosition)] = cellPosition;
+      return result;
+    },
+    {},
+  );
+  let shapeIndex = -1;
+
+  const checkNextShape = () => {
+    let shapeNext = shapes[++shapeIndex];
+
+    if (shapeNext === shape) {
+      shapeNext = shapes[++shapeIndex];
+    }
+
+    if (shapeNext) {
+      checkShapeCellsPosition(
+        shapeNext.position,
+        shapeCells,
+        shapeNext,
+        checkNextShape,
+      );
+    } else {
+      onSuccess(position);
+    }
+  };
+
+  checkNextShape();
+};
+
 export const correctShapeFieldPosition = (
   position: IVector,
   positionOld: IVector,
   field: IField,
   shape: IShape,
+  shapes: IShape[],
   onSuccess: (position: IVector) => void,
   onStop: () => void,
 ) => {
@@ -35,45 +104,25 @@ export const correctShapeFieldPosition = (
     return;
   }
 
-  checkShapeFieldCellsPosition(
+  const onCheckFieldCellsSuccess = () =>
+    checkShapesPositionConflict(
+      correctPosition,
+      shape,
+      shapes,
+      () => onSuccess(correctPosition),
+    );
+
+  checkShapeCellsPosition(
     correctPosition,
-    positionOld,
     field.filledCells,
     shape,
-    () => onSuccess(correctPosition),
-    onStop,
+    onCheckFieldCellsSuccess,
+    () => onStop && positionOld.y < position.y && onStop(),
   );
 };
 
 export const getPositionKey = (position: IVector) =>
   `${position.x}_${position.y}`;
-
-export const checkShapeFieldCellsPosition = (
-  position: IVector,
-  positionOld: IVector,
-  fieldCells: { [key: string]: IVector },
-  shape: IShape,
-  onSuccess: () => void,
-  onStop: () => void,
-) => {
-  for (let i = 0; i < shape.cells.length; i++) {
-    const cell = shape.cells[i];
-    const cellPosition = {
-      x: position.x + cell.offset.x,
-      y: position.y + cell.offset.y,
-    };
-
-    if (fieldCells[getPositionKey(cellPosition)]) {
-      if (positionOld.y < position.y) {
-        onStop();
-      }
-
-      return;
-    }
-  }
-
-  onSuccess();
-};
 
 export const pointRotate = (vector: IVector, degrees: number) => {
   const angle = degrees * (Math.PI / 180);

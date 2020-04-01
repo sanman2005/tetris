@@ -4,7 +4,7 @@ import * as WebSocket from 'ws';
 
 import { server as serverConfig } from '../../../config/app.config.json';
 import * as listeners from 'api/listeners';
-import Actions, { TAction } from 'api/actions';
+import { TAction } from 'api/actions';
 import lobby from './lobby';
 import Player from './player';
 
@@ -40,11 +40,6 @@ wss.on('connection', (socket: WebSocket) => {
     try {
       const { action, data } = JSON.parse(message);
 
-      if (action === Actions.roomLeave) {
-        onClose();
-        return;
-      }
-
       listeners.notifyReceiveListeners(action, { player, data });
     } catch (e) {
       logError(e);
@@ -54,7 +49,6 @@ wss.on('connection', (socket: WebSocket) => {
 
   try {
     lobby.addPlayer(player);
-    player.send(Actions.lobbyUpdate, lobby.getPublicRooms());
   } catch (e) {
     logError(e);
     socket.close();
