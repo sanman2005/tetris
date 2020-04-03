@@ -7,6 +7,7 @@ enum actions {
   roomLeave,
   gameUpdateClient,
   gameUpdateServer,
+  smile,
 }
 
 export default actions;

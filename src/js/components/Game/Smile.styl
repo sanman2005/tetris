@@ -1,0 +1,35 @@
+.smile
+  &__eyes
+    position absolute
+    fullSize()
+    flex(row, nowrap, space-around, flex-start)
+    padding 0 20%
+
+    &::before
+    &::after
+      content ''
+      display block
+      width 25%
+      height 50%
+      margin-top 20%
+      border-radius 100%
+      background-color $colorWhite
+      background-image radial-gradient($colorBlack 30%, transparent 31%)
+
+  &__mouth
+    position absolute
+    fullSize()
+    flex(row, nowrap, center, flex-end)
+
+  &--smile &__mouth
+    background-image radial-gradient(ellipse at top, transparent 45%, $colorBlack 50%, $colorBlack 52%, transparent 55%)
+    background-repeat no-repeat
+    background-size 70% 30%
+    background-position 50% 40%
+
+  &--sadness &__mouth
+    background-image radial-gradient(ellipse at bottom, transparent 45%, $colorBlack 50%, $colorBlack 52%, transparent 60%)
+    background-repeat no-repeat
+    background-size 60% 20%
+    background-position 50% 40%
+

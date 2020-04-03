@@ -1,3 +1,17 @@
+buttonColor($color, $hoverColor = $color)
+  background-color $color
+
+  &:hover
+    background-color $colorMain3
+    color $hoverColor
+
+  &.button--shadow
+    color $colorGray4
+    shadow($color, 7px, true)
+
+  &:active
+    color $colorMain2
+
 .button
   display flex
   border-radius $borderRadius
@@ -47,32 +61,13 @@
       color $colorMain1
 
   &--main2
-    background-color $colorMain2
-
-    &:hover
-      background-color $colorMain3
-      color $colorMain1
-
-    &.button--shadow
-      color $colorGray4
-      shadow($colorMain2, 7px, true)
-
-    &:active
-      color $colorMain2
+    buttonColor($colorMain2, $colorMain1)
 
   &--red
-    background-color $colorRed2
+    buttonColor($colorRed2)
 
-    &:hover
-      background-color $colorMain3
-      color $colorRed2
-
-    &.button--shadow
-      color $colorGray4
-      shadow($colorRed2, 7px, true)
-
-    &:active
-      color $colorMain2
+  &--yellow
+    buttonColor($colorYellow)
 
   &--light
     theme(--color-button-light)
@@ -89,6 +84,7 @@
       color $colorGray1
 
   &--circle
+  &--circle.button--shadow
     border-radius 50%
     width 60px
     height @width

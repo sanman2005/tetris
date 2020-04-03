@@ -2,12 +2,18 @@ import * as React from 'react';
 import cn from 'classnames';
 import { NavLink } from 'react-router-dom';
 
-export type TButtonType = 'main' | 'main2' | 'light' | 'red' | 'icon-main';
+export type TButtonType =
+  | 'main'
+  | 'main2'
+  | 'light'
+  | 'red'
+  | 'yellow'
+  | 'icon-main';
 export type TButtonShape = 'circle';
 
 interface IButtonProps {
   autosize?: boolean;
-  children?: React.ReactChild;
+  children?: React.ReactChild | React.ReactChild[];
   className?: string;
   disabled?: boolean;
   href?: string;

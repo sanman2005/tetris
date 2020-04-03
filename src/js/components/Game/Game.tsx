@@ -20,6 +20,7 @@ import { Content } from 'components/Grid';
 
 import Field, { IField } from './Field';
 import Shape, { Colors, IShape, IVector, shapes } from './Shape';
+import Smile, { Smiles } from './Smile';
 import { correctShapeFieldPosition, getPositionKey, pointRotate } from './GameHelpers';
 
 const CELL_SIZE = 30;
@@ -80,12 +81,15 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   keyHandlersTimes: { [key: string]: number } = {};
 
+  playerSmiles: { [key: string]: Smiles } = {};
+
   constructor(props: IGameProps) {
     super(props);
 
     if (props.server) {
       addReceiveListener(Actions.gameUpdateClient, this.sendStateServer);
       addReceiveListener(Actions.gameUpdateServer, this.updateStateServer);
+      addReceiveListener(Actions.smile, this.onSetSmile);
 
       if (props.onInit) {
         props.onInit({
@@ -127,6 +131,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     if (server) {
       removeReceiveListener(Actions.gameUpdateClient, this.sendStateServer);
       removeReceiveListener(Actions.gameUpdateServer, this.updateStateServer);
+      removeReceiveListener(Actions.smile, this.onSetSmile);
     } else if (online) {
       if (isConnected()) {
         send(Actions.roomLeave);
@@ -211,16 +216,16 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     this.updateState({
       ...INITIAL_STATE,
       field: { ...this.state.field, filledCells: {} },
+    }, () => {
+      if (!server && !online) {
+        this.addNewShape();
+      }
     });
 
     this.moveShapesOnTimer();
-
-    if (!server && !online) {
-      this.addNewShape();
-    }
   }
 
-  gameover = () => {
+  onGameover = () => {
     clearTimeout(this.timeoutShapeMove);
     this.updateState({ gameOver: true });
   }
@@ -255,7 +260,10 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         x: random(field.size.x),
         y: 0,
       },
+      smile: this.playerSmiles[shapeIndex],
     };
+
+    delete this.playerSmiles[shapeIndex];
 
     correctShapeFieldPosition(
       shape.position,
@@ -268,7 +276,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         shapesNew[shapeIndex] = shape;
         this.updateState({ gameShapes: shapesNew });
       },
-      this.gameover,
+      this.onGameover,
     );
   }
 
@@ -455,6 +463,40 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
+  onSmile = (smile: Smiles) => {
+    send(Actions.smile, { smile });
+    this.playerSmiles['my'] = smile; // TODO: delete
+  }
+
+  onSetSmile = ({ player, data }: IData<{ smile: Smiles }>) => {
+    const { smile } = data;
+
+    this.playerSmiles[player.id] = smile;
+  }
+
+  renderSmiles = () => (
+    <div className='game__smiles'>
+      <Button
+        className='game__smile'
+        onClick={() => this.onSmile(Smiles.smile)}
+        type='yellow'
+        shape='circle'
+        shadow
+      >
+        <Smile type={Smiles.smile} />
+      </Button>
+      <Button
+        className='game__smile'
+        onClick={() => this.onSmile(Smiles.sadness)}
+        type='yellow'
+        shape='circle'
+        shadow
+      >
+        <Smile type={Smiles.sadness} />
+      </Button>
+    </div>
+  )
+
   render() {
     const { online } = this.props;
     const { field, gameOver, gameShapes, stats } = this.state;
@@ -462,16 +504,13 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     return (
       <Content className={cn('game', { 'game--over': gameOver })}>
         <Control onKeyDown={this.onKeyDown} />
+        <div className='game__main'>
         <Field {...field} cellSize={CELL_SIZE}>
           {Object.values(gameShapes).map(
             shape =>
               shape && <Shape key={shape.id} cellSize={CELL_SIZE} {...shape} />,
           )}
         </Field>
-        <div className='game__stats'>
-          <div className='game__stats-label'>{i18n`rowsRemoved`}:</div>
-          <div className='game__stats-value'>{stats.rowsRemoved}</div>
-        </div>
         <div className='game__over'>
           {i18n`gameOver`}
           <Button text={i18n`newGame`} type='main' onClick={this.newGame} />
@@ -484,6 +523,15 @@ export default class Game extends React.Component<IGameProps, IGameState> {
             onClick={this.onExit}
           />
         )}
+        </div>
+
+        <div className='game__side'>
+          <div className='game__stats'>
+            <div className='game__stats-label'>{i18n`rowsRemoved`}:</div>
+            <div className='game__stats-value'>{stats.rowsRemoved}</div>
+          </div>
+          {this.renderSmiles()}
+        </div>
       </Content>
     );
   }

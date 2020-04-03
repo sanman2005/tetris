@@ -1,10 +1,12 @@
 .game
-  position relative
-  flex(column)
+  flex(row, wrap, center, flex-start)
+
+  &__main
+    position relative
+    text-align center
 
   &__stats
     flex()
-    margin-top 30px
 
     &-label
       margin-right 10px
@@ -37,3 +39,20 @@
   &__exit
     max-width 150px
     margin-top 20px
+
+  &__side
+    padding 0 $columnPadding
+
+  &__smiles
+    margin-top 50px
+
+  &__smile
+    margin-top 20px
+
+    .smile
+      &__eyes
+      &__mouth
+        height 50%
+
+      &__mouth
+        top 50%
