@@ -12,6 +12,7 @@ import Button from 'components/Button';
 import { Form, TFormSubmit } from 'components/Form';
 import { InputName } from 'components/Input';
 import List from 'components/List';
+import Loading from 'components/Loading';
 
 export interface IRoom {
   id: string;
@@ -52,19 +53,19 @@ class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
   onDisconnect = () => {
     this.setState({ connected: false });
     apiSocket.connect();
-  }
+  };
 
   setRooms = (rooms: IRoom[]) => this.setState({ rooms });
 
   join = (roomId: string) => {
     apiSocket.send(Actions.roomJoin, { roomId });
     this.goToGame();
-  }
+  };
 
   create: TFormSubmit = (data, onSuccessHook, onErrorHook) => {
     apiSocket.send(Actions.roomCreate, { title: data.title });
     this.goToGame();
-  }
+  };
 
   goToGame = () => this.props.history.push(`${pagesPath.game}/online`);
 
@@ -82,8 +83,7 @@ class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
             <div className='lobby__room-content' key={room.id}>
               <div className='lobby__room-title'>{room.title}</div>
               <div className='lobby__room-players'>
-                {i18n`playersCount`}:
-                <span>{room.playersCount}</span>
+                {i18n`playersCount`}:<span>{room.playersCount}</span>
               </div>
               <Button text={i18n`join`} onClick={() => this.join(room.id)} />
             </div>
@@ -105,7 +105,9 @@ class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
         <Form
           error={this.state.error}
           fields={{
-            title: <InputName required maxLength={Constants.roomTitleLengthMax} />,
+            title: (
+              <InputName required maxLength={Constants.roomTitleLengthMax} />
+            ),
           }}
           sendText={i18n`create`}
           buttons={[
@@ -128,13 +130,11 @@ class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
     return (
       <div className='lobby'>
         <div className='title'>{i18n`onlineGame`}</div>
-        {connected === false ? (
+        {connected === null && <Loading />}
+        {connected === false && (
           <div className='lobby__disconnect'>{i18n`disconnect`}</div>
-        ) : creating ? (
-          this.renderCreating()
-        ) : (
-          this.renderRooms()
         )}
+        {connected && (creating ? this.renderCreating() : this.renderRooms())}
       </div>
     );
   }

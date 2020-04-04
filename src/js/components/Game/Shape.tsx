@@ -71,6 +71,7 @@ export const shapes: { [key: string]: ICell[] } = {
 
 interface IShapeProps extends IShape {
   cellSize: number;
+  onClick?: () => void;
 }
 
 interface IShapeState {
@@ -142,12 +143,13 @@ export default class Shape extends React.PureComponent<
   }
 
   render() {
-    const { cellSize, cells, color, position } = this.props;
+    const { cellSize, cells, color, onClick, position } = this.props;
     const { smile } = this.state;
 
     return (
       <div
         className={cn('shape', { [`shape--${color}`]: color })}
+        onClick={onClick || null}
         style={{
           width: `${cellSize}px`,
           height: `${cellSize}px`,

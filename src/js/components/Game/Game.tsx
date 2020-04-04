@@ -469,10 +469,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
-  onSmile = (smile: Smiles) => {
-    send(Actions.smile, { smile });
-    this.playerSmiles['my'] = smile; // TODO: delete
-  }
+  onSmile = (smile: Smiles) => send(Actions.smile, { smile });
 
   onSetSmile = ({ player, data }: IData<{ smile: Smiles }>) => {
     const { smile } = data;
@@ -508,7 +505,14 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         <Field {...field} cellSize={CELL_SIZE}>
           {Object.values(gameShapes).map(
             shape =>
-              shape && <Shape key={shape.id} cellSize={CELL_SIZE} {...shape} />,
+              shape && (
+                <Shape
+                  {...shape}
+                  key={shape.id}
+                  cellSize={CELL_SIZE}
+                  onClick={() => this.rotate()}
+                />
+              ),
           )}
         </Field>
         <div className='game__over'>
@@ -530,7 +534,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
             <div className='game__stats-label'>{i18n`rowsRemoved`}:</div>
             <div className='game__stats-value'>{stats.rowsRemoved}</div>
           </div>
-          {this.renderSmiles()}
+          {online && this.renderSmiles()}
         </div>
       </Content>
     );
