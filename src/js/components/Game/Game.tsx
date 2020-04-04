@@ -523,7 +523,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
                 <Shape
                   {...shape}
                   key={shape.id}
-                  cellSize={CELL_SIZE}
+                  fieldSize={field.size}
                   onClick={() => this.rotate()}
                 />
               ),

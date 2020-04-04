@@ -70,7 +70,7 @@ export const shapes: { [key: string]: ICell[] } = {
 };
 
 interface IShapeProps extends IShape {
-  cellSize: number;
+  fieldSize: IVector;
   onClick?: () => void;
 }
 
@@ -143,18 +143,20 @@ export default class Shape extends React.PureComponent<
   }
 
   render() {
-    const { cellSize, cells, color, onClick, position } = this.props;
+    const { fieldSize, cells, color, onClick, position } = this.props;
     const { smile } = this.state;
+    const cellSizeX = 100 / fieldSize.x;
+    const cellSizeY = 100 / fieldSize.y;
 
     return (
       <div
         className={cn('shape', { [`shape--${color}`]: color })}
         onClick={onClick || null}
         style={{
-          width: `${cellSize}px`,
-          height: `${cellSize}px`,
-          left: `${position.x * cellSize}px`,
-          top: `${position.y * cellSize}px`,
+          width: `${cellSizeX}%`,
+          height: `${cellSizeY}%`,
+          left: `${position.x * cellSizeX}%`,
+          top: `${position.y * cellSizeY}%`,
         }}
       >
         {cells.map(cell => (

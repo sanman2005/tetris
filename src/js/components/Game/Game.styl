@@ -1,20 +1,31 @@
 .game
-  flex(row, wrap, center, flex-start)
+  flex(row, nowrap, center, flex-start)
 
   &__main
     position relative
     text-align center
 
   &__stats
-    flex()
+    flex(row, nowrap)
+    line-height 1
+
+    +below('xs')
+      align-items flex-end
 
     &-label
       margin-right 10px
+
+      +below('xs')
+        margin-right 5px
+        font-size 11px
 
     &-value
       font-size 20px
       font-weight bold
       color $colorMain1
+
+      +below('xs')
+        font-size 16px
 
   &:not(&--over) &__over
     transform scale(0) translate(-100%, -100%)

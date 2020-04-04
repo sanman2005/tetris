@@ -13,7 +13,11 @@ export default () => (
     <Container>
       <Row>
         <Column xs={6} className='footer__copyright'>
-          © Tetris, {year}
+          ©
+          <a className='link' href='mailto:sanman@mail.ru'>
+            Sanman
+          </a>
+          , {year}
         </Column>
         <Column xs={6} className='footer__agreement'>
           {/*<Link to={pagesPath.terms}>{i18n`terms`}</Link>*/}
