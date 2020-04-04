@@ -10,6 +10,7 @@ import { pagesPath } from 'pages/index';
 
 import Button from 'components/Button';
 import { Form, TFormSubmit } from 'components/Form';
+import CheckBox from 'components/CheckBox';
 import { InputName } from 'components/Input';
 import List from 'components/List';
 import Loading from 'components/Loading';
@@ -63,7 +64,7 @@ class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
   };
 
   create: TFormSubmit = (data, onSuccessHook, onErrorHook) => {
-    apiSocket.send(Actions.roomCreate, { title: data.title });
+    apiSocket.send(Actions.roomCreate, data);
     this.goToGame();
   };
 
@@ -103,10 +104,20 @@ class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
     return (
       <div className='lobby__create'>
         <Form
+          title={i18n`roomSettings`}
           error={this.state.error}
           fields={{
             title: (
               <InputName required maxLength={Constants.roomTitleLengthMax} />
+            ),
+            players: (
+              <CheckBox
+                name='playersMax'
+                labelOff={2}
+                labelOn={Constants.roomPlayersMax}
+                toggleStyle
+                toggleLabel={`${i18n`players`}:`}
+              />
             ),
           }}
           sendText={i18n`create`}

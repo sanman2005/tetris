@@ -13,7 +13,7 @@ export interface IData<T = object> {
 
 export interface IRoomOptions {
   playersMax: number;
-  private: boolean;
+  private?: boolean;
   title: string;
 }
 
@@ -35,7 +35,10 @@ export const createRoom = (options: IRoomOptions) => {
   }
 
   options.title = options.title.slice(0, Constants.roomTitleLengthMax);
-  options.playersMax = Math.max(Math.floor(options.playersMax), 2) || 2;
+  options.playersMax = Math.max(
+    Math.min(Math.floor(options.playersMax), Constants.roomPlayersMax),
+    2,
+  );
 
   const room: IRoom = {
     id: uuid(),

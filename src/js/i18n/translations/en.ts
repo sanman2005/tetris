@@ -42,6 +42,7 @@ export default {
   recoveryAccess: 'access recovery',
   rowsRemoved: 'rows removed',
   roomsAvailable: 'available rooms',
+  roomSettings: 'room settings',
   save: 'save',
   signin: 'sign in',
   signup: 'sign up',

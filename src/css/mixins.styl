@@ -26,6 +26,9 @@ back($image)
     filter $backFilter
     z-index -1
 
+gradient($color, $colorDark)
+  background-image linear-gradient(145deg, $color, $colorDark)
+
 shadowText(inverse = false)
   will-change text-shadow
 
@@ -49,7 +52,7 @@ shadowInset($size = 5px)
     box-shadow 1px 1px 2px $colorShadowDark, -1px -1px 2px $colorShadowLight
     pointer-events none
 
-shadow($color = $colorShadowLight, $size = 7px, withHover = false)
+shadow($color = $colorShadowLight, $size = 7px, withHover = false, $colorDark = null)
   position relative
   border-radius $borderRadius
   shadowText()
@@ -60,13 +63,15 @@ shadow($color = $colorShadowLight, $size = 7px, withHover = false)
     &:hover
       shadowInset($size * 0.6)
 
+  if $colorDark
+    gradient($color, $colorDark)
+
   $lightShadow = (-($size * .8)) (-($size * .5)) max(4px, $size * .7) $colorShadowLight
   $darkShadow = ($size * .8) ($size * .5) max(4px, $size * .7) $colorShadowDark
   $ownShadow = 0 0 $size $color
   $shadow = $lightShadow, $darkShadow, $ownShadow
 
-  if $color != $colorShadowLight
-    background-image linear-gradient(145deg, $color, darken($color, 20%))
+  if $colorDark
     box-shadow $shadow, inset 0 0 min($size * 2, 10px) var(--color-shadow-self)
   else
     box-shadow $shadow

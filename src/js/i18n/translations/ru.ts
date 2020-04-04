@@ -67,6 +67,7 @@ export default {
   recoveryAccess: 'восстановление доступа',
   register: 'зарегистрироваться',
   roomsAvailable: 'доступные комнаты',
+  roomSettings: 'настройки комнаты',
   rowsRemoved: 'удалено строк',
   save: 'сохранить',
   signin: 'вход',

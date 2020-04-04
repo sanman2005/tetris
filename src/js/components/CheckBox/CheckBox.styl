@@ -75,3 +75,55 @@
 
     +below('xs')
       left 35px
+
+  &--toggle
+    $radius = 64px
+    flex()
+    width auto
+    padding 0
+    box-shadow none
+    font-weight bold
+
+    label
+      position relative
+      padding 20px
+      font-size 20px
+      line-height 1
+      shadowInset()
+      background-color $colorRecess
+      color $colorGray1
+
+      &
+      &::before
+        border-radius $radius
+
+    & ^[0]__label
+      margin-right 20px
+      color $colorGray1
+
+    & ^[0]__box
+      shadow($colorBack3, 3px, false, $colorBack4)
+      flex()
+      justify-content center
+      position absolute
+      width 50%
+      height 86%
+      top 9%
+      left 5%
+      margin-right 0
+      font-size 24px
+      color $colorMain1
+      transition()
+
+      &::after
+        display none
+
+      &
+      &::before
+        border-radius $radius * .9
+
+    input
+      width 50px
+
+      &:checked + ^[0]__box
+        left 46%

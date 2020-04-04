@@ -5,10 +5,12 @@ import cn from 'classnames';
 export interface ICheckBoxProps extends IValidationProps {
   checkToBack?: boolean;
   key?: string;
-  labelOff: string;
-  labelOn?: string;
+  labelOff: React.ReactNode;
+  labelOn?: React.ReactNode;
   name: string;
   ref?: (input: any) => void;
+  toggleStyle?: boolean;
+  toggleLabel?: string;
   value?: boolean;
 }
 
@@ -16,7 +18,10 @@ interface IState {
   value: boolean;
 }
 
-export default class CheckBox extends ValidationComponent<ICheckBoxProps, IState> {
+export default class CheckBox extends ValidationComponent<
+  ICheckBoxProps,
+  IState
+> {
   onChange = (event: React.FormEvent<HTMLInputElement>) => {
     const { value } = this.state;
     const { name, onChange, onFocus } = this.props;
@@ -32,7 +37,7 @@ export default class CheckBox extends ValidationComponent<ICheckBoxProps, IState
     }
 
     return true;
-  }
+  };
 
   render() {
     const {
@@ -44,20 +49,24 @@ export default class CheckBox extends ValidationComponent<ICheckBoxProps, IState
       ref,
       required,
       showError,
+      toggleStyle,
+      toggleLabel,
     } = this.props;
     const { value } = this.state;
     const text = <div>{value ? labelOn || labelOff : labelOff}</div>;
     const error = this.validationError;
     const fieldClass = cn('input-check', {
       'input-check--error': error && showError,
-      ['input-check--reverse']: checkToBack,
-      ['input-check--required']: required,
+      'input-check--reverse': checkToBack,
+      'input-check--required': required,
+      'input-check--toggle': toggleStyle,
     });
 
     return (
-      <fieldset className={fieldClass}>
+      <div className={fieldClass}>
+        {toggleLabel && <div className='input-check__label'>{toggleLabel}</div>}
         <label>
-          {checkToBack && text}
+          {toggleStyle ? labelOff : checkToBack && text}
           <input
             type='checkbox'
             name={name || key}
@@ -65,13 +74,15 @@ export default class CheckBox extends ValidationComponent<ICheckBoxProps, IState
             onChange={this.onChange}
             ref={ref}
           />
-          <span className='input-check__box' />
-          {!checkToBack && text}
+          <span className='input-check__box'>
+            {toggleStyle && (value ? labelOn : labelOff)}
+          </span>
+          {toggleStyle ? labelOn : !checkToBack && text}
           {error && showError && (
             <span className='input-check__error'>{this.validationError}</span>
           )}
         </label>
-      </fieldset>
+      </div>
     );
   }
 }

@@ -7,7 +7,7 @@ buttonColor($color, $hoverColor = $color)
 
   &.button--shadow
     color $colorGray4
-    shadow($color, 7px, true)
+    shadow($color, 7px, true, darken($color, 20%))
 
   &:active
     color $colorMain2

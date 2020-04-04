@@ -213,11 +213,16 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   newGame = () => {
     const { online, server } = this.props;
 
+    if (online) {
+      this.onExit();
+      return;
+    }
+
     this.updateState({
       ...INITIAL_STATE,
       field: { ...this.state.field, filledCells: {} },
     }, () => {
-      if (!server && !online) {
+      if (!server) {
         this.addNewShape();
       }
 
@@ -301,6 +306,11 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const allGameShapes = Object.values(gameShapes);
     const shapesNew = { ...gameShapes };
     const shape = shapesNew[shapeIndex];
+
+    if (!shape) {
+      return;
+    }
+
     const shapeNewPosition = {
       x: shape.position.x + Math.max(-1, Math.min(Math.floor(direction.x), 1)),
       y: shape.position.y + Math.max(0, Math.min(Math.floor(direction.y), 1)),
@@ -335,6 +345,10 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const allGameShapes = Object.values(gameShapes);
     const shapesNew = { ...gameShapes };
     const shape = shapesNew[shapeIndex];
+
+    if (!shape) {
+      return;
+    }
 
     shape.cells = [...shape.cells].map(cell => ({
       ...cell,
@@ -519,7 +533,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
           {i18n`gameOver`}
           <Button text={i18n`newGame`} type='main' onClick={this.newGame} />
         </div>
-        {online && (
+        {online && !gameOver && (
           <Button
             className='game__exit'
             text={i18n`exit`}
