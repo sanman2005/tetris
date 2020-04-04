@@ -87,7 +87,7 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
         <Container>
           <div className='header__content'>
             <Link to='/' className='header__logo'>
-              <img src='/img/images/logo.png' alt='Tetris' />
+              <img src='/img/logo.png' alt='Tetris' />
             </Link>
 
             <div className='header__links'>
