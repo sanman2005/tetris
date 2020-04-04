@@ -434,11 +434,17 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   moveShapesOnTimer = () => {
+    const { gameShapes, gameOver, timeShapeMove } = this.state;
+
+    if (gameOver) {
+      return;
+    }
+
     this.timeoutShapeMove = setTimeout(() => {
-      Object.keys(this.state.gameShapes).forEach(key => this.moveDown(key));
+      Object.keys(gameShapes).forEach(key => this.moveDown(key));
 
       this.moveShapesOnTimer();
-    }, this.state.timeShapeMove * 1000);
+    }, timeShapeMove * 1000);
   }
 
   onKeyDown = (key: string) => {
@@ -476,24 +482,18 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   renderSmiles = () => (
     <div className='game__smiles'>
-      <Button
-        className='game__smile'
-        onClick={() => this.onSmile(Smiles.smile)}
-        type='yellow'
-        shape='circle'
-        shadow
-      >
-        <Smile type={Smiles.smile} />
-      </Button>
-      <Button
-        className='game__smile'
-        onClick={() => this.onSmile(Smiles.sadness)}
-        type='yellow'
-        shape='circle'
-        shadow
-      >
-        <Smile type={Smiles.sadness} />
-      </Button>
+      {[Smiles.hi, Smiles.smile, Smiles.sadness].map(smile => (
+        <Button
+          className='game__smile'
+          onClick={() => this.onSmile(smile)}
+          type='yellow'
+          shape='circle'
+          shadow
+          key={smile}
+        >
+          <Smile type={smile} />
+        </Button>
+      ))}
     </div>
   )
 

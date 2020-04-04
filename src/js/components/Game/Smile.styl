@@ -19,8 +19,8 @@
   &__mouth
     position absolute
     fullSize()
-    flex(row, nowrap, center, flex-end)
 
+  &--hi &__mouth
   &--smile &__mouth
     background-image radial-gradient(ellipse at top, transparent 45%, $colorBlack 50%, $colorBlack 52%, transparent 55%)
     background-repeat no-repeat
@@ -33,3 +33,24 @@
     background-size 60% 20%
     background-position 50% 40%
 
+
+  &--hi &__hand-right
+    position absolute
+    fullSize()
+    flex()
+    justify-content center
+    background-image radial-gradient(ellipse at center, $colorWhite 40%, transparent 41%)
+    background-repeat no-repeat
+    background-size 40% 80%
+    background-position 50% 50%
+    filter drop-shadow(0 0 1px $colorBlack)
+    transform rotateZ(10deg)
+
+    &::after
+      content ''
+      display block
+      width 15%
+      height 30%
+      border-radius 100%
+      background-color $colorWhite
+      transform rotateZ(-45deg) translate(-90%, -5%)

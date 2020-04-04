@@ -101,16 +101,20 @@ const getSmileParams = (cells: ICell[]) => {
   let bottomX = Math.floor(leftBottom - bottomOffset + bottomCount / 2);
   let topX = Math.floor(leftTop - topOffset + topCount / 2);
 
-  return {
-    top: {
-      size: { x: topSize, y: 1 },
-      position: { x: topX, y: isTopHigher ? maxY - 1 : maxY },
-    },
-    bottom: {
-      size: { x: bottomSize, y: 1 },
-      position: { x: bottomX, y: maxY },
-    },
+  const top = {
+    size: { x: topSize, y: 1 },
+    position: { x: topX, y: isTopHigher ? maxY - 1 : maxY },
   };
+  const bottom = {
+    size: { x: bottomSize, y: 1 },
+    position: { x: bottomX, y: maxY },
+  };
+  const right = {
+    size: { x: 1, y: 1 },
+    position: { x: top.position.x + topCount, y: top.position.y },
+  };
+
+  return { top, bottom, right };
 };
 
 export default class Shape extends React.PureComponent<
