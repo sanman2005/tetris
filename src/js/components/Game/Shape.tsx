@@ -107,7 +107,7 @@ const getSmileParams = (cells: ICell[]) => {
   };
   const bottom = {
     size: { x: bottomSize, y: 1 },
-    position: { x: bottomX, y: maxY },
+    position: { x: bottomX, y: isTopHigher ? maxY : maxY + 1 },
   };
   const right = {
     size: { x: 1, y: 1 },

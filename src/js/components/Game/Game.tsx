@@ -220,9 +220,9 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       if (!server && !online) {
         this.addNewShape();
       }
-    });
 
-    this.moveShapesOnTimer();
+      this.moveShapesOnTimer();
+    });
   }
 
   onGameover = () => {
