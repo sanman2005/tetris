@@ -16,7 +16,7 @@ export type TPageRouteProps = {
   ) => void;
   onDeactive?: (ref?: HTMLDivElement, theme?: string) => void;
   path?: string;
-  theme?: 'login' | 'page404';
+  theme?: 'login' | 'page404' | 'home';
 };
 
 export class PageRoute extends React.PureComponent<TPageRouteProps & RouteProps> {

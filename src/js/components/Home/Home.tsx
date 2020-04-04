@@ -12,9 +12,9 @@ export default () => (
     <AnimatedText
       className='home__title'
       texts={[
-        i18n`motivation1`,
-        i18n`motivation2`,
-        i18n`motivation3`,
+        'This is Tetris!',
+        'This is Tetris!!',
+        'This is Tetris!!!',
       ]}
     />
     <div className='home__links'>

@@ -50,7 +50,7 @@ class Root extends React.Component<RouteComponentProps & any> {
     return (
       <Layout key={getLang()}>
         <PageManager key={this.props.location.pathname} isLast>
-          <PageRoute path='/' exact component={Home} />
+          <PageRoute path='/' exact component={Home} theme='home' />
           <PageRoute
             path={`${pagesPath.login}/:stage?`}
             component={Login}
