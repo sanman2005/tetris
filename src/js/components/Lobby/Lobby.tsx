@@ -30,7 +30,7 @@ interface ILobbyState {
 
 class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
   state: ILobbyState = {
-    connected: null,
+    connected: apiSocket.isConnected() || null,
     creating: false,
     error: '',
     rooms: [],

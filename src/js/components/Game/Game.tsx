@@ -160,11 +160,6 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
-  onExit = () => {
-    this.onEnd();
-    this.props.onBack();
-  }
-
   onPlayerAdd = (id: string) => {
     this.addNewShape(id);
   }
@@ -229,10 +224,10 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   newGame = () => {
-    const { online, server } = this.props;
+    const { onBack, online, server } = this.props;
 
     if (online) {
-      this.onExit();
+      onBack();
       return;
     }
 
@@ -567,8 +562,8 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   )
 
   render() {
-    const { online } = this.props;
-    const { field, fieldElement, gameOver, gameShapes, stats } = this.state;
+    const { onBack, online } = this.props;
+    const { field, fieldElement, gameOver, gameShapes } = this.state;
 
     return (
       <Content className={cn('game', { 'game--over': gameOver })}>
@@ -595,7 +590,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
             className='game__exit'
             text={i18n`exit`}
             type='light'
-            onClick={this.onExit}
+            onClick={onBack}
           />
         )}
         </div>

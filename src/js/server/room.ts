@@ -64,7 +64,6 @@ export const createRoom = (options: IRoomOptions) => {
       this.game.playerAdd(player.id);
     },
     removePlayer(player) {
-      console.log(this);
       const playerIndex = this.players.indexOf(player);
 
       if (playerIndex < 0) {
