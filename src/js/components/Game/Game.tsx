@@ -18,9 +18,9 @@ import Button from 'components/Button';
 import Control from 'components/Control';
 import { Content } from 'components/Grid';
 
-import Field, { IField } from './Field';
-import Shape, { Colors, IShape, IVector, shapes } from './Shape';
-import Smile, { Smiles } from './Smile';
+import Field, { IField } from './Parts/Field';
+import Shape, { Colors, IShape, IVector, shapes } from './Parts/Shape';
+import Smile, { Smiles } from './Parts/Smile';
 import { correctShapeFieldPosition, getPositionKey, pointRotate } from './GameHelpers';
 
 const CELL_SIZE = 30;
@@ -534,7 +534,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   getFieldRef = (ref: HTMLDivElement) =>
-    !this.state.fieldElement && this.setState({ fieldElement: ref});
+    !this.state.fieldElement && this.setState({ fieldElement: ref })
 
   renderSmiles = () => (
     <div className='game__smiles'>
@@ -564,7 +564,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         <div className='game__stat-value'>{score}</div>
       </div>
     </div>
-  );
+  )
 
   render() {
     const { online } = this.props;

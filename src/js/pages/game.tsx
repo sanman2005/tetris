@@ -16,5 +16,5 @@ export default withRouter((props: RouteComponentProps<IGamePage>) => {
       online={!!online}
       onBack={() => props.history.push(online ? pagesPath.lobby : '/')}
     />
-  )
+  );
 });

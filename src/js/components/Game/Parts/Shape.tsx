@@ -2,8 +2,8 @@ import * as React from 'react';
 import cn from 'classnames';
 
 import Cell, { ICell } from './Cell';
-import { getPositionKey } from './GameHelpers';
 import Smile, { ISmile, Smiles } from './Smile';
+import { getPositionKey } from '../GameHelpers';
 
 export interface IVector {
   x: number;
@@ -99,8 +99,8 @@ const getSmileParams = (cells: ICell[]) => {
   const bottomOffset = bottomSize * 0.5;
   const topOffset = topSize * 0.5;
 
-  let bottomX = Math.floor(leftBottom - bottomOffset + bottomCount / 2);
-  let topX = Math.floor(leftTop - topOffset + topCount / 2);
+  const bottomX = Math.floor(leftBottom - bottomOffset + bottomCount / 2);
+  const topX = Math.floor(leftTop - topOffset + topCount / 2);
 
   const top = {
     size: { x: topSize, y: 1 },

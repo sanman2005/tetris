@@ -37,7 +37,7 @@ export default class CheckBox extends ValidationComponent<
     }
 
     return true;
-  };
+  }
 
   render() {
     const {

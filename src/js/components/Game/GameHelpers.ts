@@ -1,5 +1,5 @@
-import { IShape, IVector } from './Shape';
-import { IField } from './Field';
+import { IShape, IVector } from './Parts/Shape';
+import { IField } from './Parts/Field';
 
 const checkShapeCellsPosition = (
   position: IVector,

@@ -54,19 +54,19 @@ class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
   onDisconnect = () => {
     this.setState({ connected: false });
     apiSocket.connect();
-  };
+  }
 
   setRooms = (rooms: IRoom[]) => this.setState({ rooms });
 
   join = (roomId: string) => {
     apiSocket.send(Actions.roomJoin, { roomId });
     this.goToGame();
-  };
+  }
 
   create: TFormSubmit = (data, onSuccessHook, onErrorHook) => {
     apiSocket.send(Actions.roomCreate, data);
     this.goToGame();
-  };
+  }
 
   goToGame = () => this.props.history.push(`${pagesPath.game}/online`);
 
