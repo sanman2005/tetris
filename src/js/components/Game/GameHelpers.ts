@@ -50,7 +50,7 @@ const checkShapesPositionConflict = (
   const checkNextShape = () => {
     let shapeNext = shapes[++shapeIndex];
 
-    if (shapeNext === shape) {
+    if (shapeNext && shapeNext.id === shape.id) {
       shapeNext = shapes[++shapeIndex];
     }
 
@@ -76,7 +76,7 @@ export const correctShapeFieldPosition = (
   shape: IShape,
   shapes: IShape[],
   onSuccess: (position: IVector) => void,
-  onStop: () => void,
+  onStop?: () => void,
 ) => {
   const correctPosition = { ...position };
   const shapeLeftEdge = shape.cells.reduce(
@@ -99,8 +99,10 @@ export const correctShapeFieldPosition = (
   }
 
   if (position.y + shapeBottomEdge >= field.size.y) {
-    correctPosition.y -= position.y + shapeBottomEdge - field.size.y + 1;
-    onStop();
+    if (onStop) {
+      onStop();
+    }
+
     return;
   }
 

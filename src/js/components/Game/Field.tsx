@@ -20,7 +20,7 @@ export default ({
   cellSize,
   children,
   filledCells,
-                  getRef,
+  getRef,
   size,
 }: IFieldProps) => (
   <div

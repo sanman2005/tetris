@@ -328,7 +328,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         this.updateState({ gameShapes: shapesNew });
       },
       () => {
-        this.fillFieldCells(shape);
+        this.fillFieldCells(shapeIndex);
         this.addNewShape(shapeIndex);
       },
     );
@@ -343,39 +343,44 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
 
     const { field, gameShapes } = this.state;
-    const allGameShapes = Object.values(gameShapes);
-    const shapesNew = { ...gameShapes };
-    const shape = shapesNew[shapeIndex];
+    const shape = gameShapes[shapeIndex];
 
     if (!shape) {
       return;
     }
 
-    shape.cells = [...shape.cells].map(cell => ({
-      ...cell,
-      offset: pointRotate(cell.offset, angle),
-    }));
+    const shapeNew = {
+      ...shape,
+      cells: shape.cells.map(cell => ({
+        ...cell,
+        offset: pointRotate(cell.offset, angle),
+      })),
+    };
+    const allGameShapes = Object.values(gameShapes);
 
     correctShapeFieldPosition(
-      shape.position,
-      shape.position,
+      shapeNew.position,
+      shapeNew.position,
       field,
-      shape,
+      shapeNew,
       allGameShapes,
       (position) => {
-        shape.position = position;
+        const shapesNew = { ...gameShapes };
+
+        shapeNew.position = position;
+        shapesNew[shapeIndex] = shapeNew;
         this.updateState({ gameShapes: shapesNew });
-      },
-      () => {
-        this.fillFieldCells(shape);
-        this.addNewShape(shapeIndex);
       },
     );
   }
 
-  fillFieldCells = (shape: IShape) => {
-    const { field } = this.state;
+  fillFieldCells = (shapeIndex = MY_SHAPE_INDEX) => {
+    const { field, gameShapes } = this.state;
     const filledCells = { ...field.filledCells };
+    const newShapes = { ...gameShapes };
+    const shape = gameShapes[shapeIndex];
+
+    delete newShapes[shapeIndex];
 
     shape.cells.forEach((cell) => {
       const cellPosition = {
@@ -396,6 +401,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
           ...field,
           filledCells,
         },
+        gameShapes: newShapes,
       },
       this.removeFilledRows,
     );
