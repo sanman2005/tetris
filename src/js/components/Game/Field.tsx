@@ -4,27 +4,35 @@ import { IVector } from './Shape';
 import Cell from './Cell';
 
 export interface IField {
-  filledCells: { [key: string]: IVector & { id: string }};
+  filledCells: { [key: string]: IVector & { id: string } };
   size: IVector;
 }
 
 interface IFieldProps extends IField {
   cellSize: number;
   children: React.ReactNode;
+  getRef?: (ref: HTMLDivElement) => void;
 }
 
 const MAX_SCREEN_WIDTH = 60;
 
-export default ({ cellSize, children, filledCells, size }: IFieldProps) => (
+export default ({
+  cellSize,
+  children,
+  filledCells,
+                  getRef,
+  size,
+}: IFieldProps) => (
   <div
     className='field'
     style={{
       width: `${size.x * cellSize}px`,
       height: `${size.y * cellSize}px`,
       maxWidth: `${MAX_SCREEN_WIDTH}vw`,
-      maxHeight: `${MAX_SCREEN_WIDTH * size.y / size.x}vw`,
+      maxHeight: `${(MAX_SCREEN_WIDTH * size.y) / size.x}vw`,
       backgroundSize: `${100 / size.x}% ${100 / size.y}%`,
     }}
+    ref={getRef ? ref => ref && getRef(ref) : null }
   >
     <div
       className='field__cells'
@@ -33,9 +41,9 @@ export default ({ cellSize, children, filledCells, size }: IFieldProps) => (
         height: `${100 / size.y}%`,
       }}
     >
-      {Object.values(filledCells).map(cell => cell && (
-        <Cell offset={cell} key={cell.id} />
-      ))}
+      {Object.values(filledCells).map(
+        cell => cell && <Cell offset={cell} key={cell.id} />,
+      )}
     </div>
     {children}
   </div>

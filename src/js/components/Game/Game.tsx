@@ -55,6 +55,7 @@ interface IGameProps {
 
 interface IGameState {
   field?: IField;
+  fieldElement?: HTMLDivElement;
   gameOver?: boolean;
   gameShapes?: { [key: string]: IShape };
   stats?: IGameStats;
@@ -508,27 +509,29 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     </div>
   )
 
+  getFieldRef = (ref: HTMLDivElement) =>
+    !this.state.fieldElement && this.setState({ fieldElement: ref});
+
   render() {
     const { online } = this.props;
-    const { field, gameOver, gameShapes, stats } = this.state;
+    const { field, fieldElement, gameOver, gameShapes, stats } = this.state;
 
     return (
       <Content className={cn('game', { 'game--over': gameOver })}>
-        <Control onKeyDown={this.onKeyDown} />
+        <Control onKeyDown={this.onKeyDown} touchTarget={fieldElement} />
         <div className='game__main'>
-        <Field {...field} cellSize={CELL_SIZE}>
-          {Object.values(gameShapes).map(
-            shape =>
-              shape && (
-                <Shape
-                  {...shape}
-                  key={shape.id}
-                  fieldSize={field.size}
-                  onClick={() => this.rotate()}
-                />
-              ),
-          )}
-        </Field>
+          <Field
+            {...field}
+            cellSize={CELL_SIZE}
+            getRef={this.getFieldRef}
+          >
+            {Object.values(gameShapes).map(
+              shape =>
+                shape && (
+                  <Shape {...shape} key={shape.id} fieldSize={field.size} />
+                ),
+            )}
+          </Field>
         <div className='game__over'>
           {i18n`gameOver`}
           <Button text={i18n`newGame`} type='main' onClick={this.newGame} />
