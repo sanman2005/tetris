@@ -542,7 +542,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
           {i18n`gameOver`}
           <Button text={i18n`newGame`} type='main' onClick={this.newGame} />
         </div>
-        {online && !gameOver && (
+        {!gameOver && (
           <Button
             className='game__exit'
             text={i18n`exit`}

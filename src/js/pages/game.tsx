@@ -8,9 +8,13 @@ interface IGamePage {
   online?: string;
 }
 
-export default withRouter((props: RouteComponentProps<IGamePage>) => (
-  <Game
-    online={!!props.match.params.online}
-    onBack={() => props.history.push(pagesPath.lobby)}
-  />
-));
+export default withRouter((props: RouteComponentProps<IGamePage>) => {
+  const { online } = props.match.params;
+
+  return (
+    <Game
+      online={!!online}
+      onBack={() => props.history.push(online ? pagesPath.lobby : '/')}
+    />
+  )
+});
