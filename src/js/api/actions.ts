@@ -5,8 +5,8 @@ enum actions {
   roomCreate,
   roomJoin,
   roomLeave,
-  gameUpdateClient,
-  gameUpdateServer,
+  gameGet,
+  gameUpdate,
   smile,
 }
 

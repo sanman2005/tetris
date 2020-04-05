@@ -105,8 +105,8 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     super(props);
 
     if (props.server) {
-      addReceiveListener(Actions.gameUpdateClient, this.sendStateServer);
-      addReceiveListener(Actions.gameUpdateServer, this.updateStateServer);
+      addReceiveListener(Actions.gameGet, this.sendServerState);
+      addReceiveListener(Actions.gameUpdate, this.serverReceiveState);
       addReceiveListener(Actions.smile, this.onSetSmile);
 
       if (props.onInit) {
@@ -129,9 +129,9 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         return;
       }
 
-      addReceiveListener(Actions.gameUpdateClient, this.updateState);
+      addReceiveListener(Actions.gameUpdate, this.updateState);
       addDisconnectListener(this.onEnd);
-      send(Actions.gameUpdateClient);
+      send(Actions.gameGet);
     } else {
       this.newGame();
     }
@@ -147,22 +147,20 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     clearTimeout(this.timeoutShapeMove);
 
     if (server) {
-      removeReceiveListener(Actions.gameUpdateClient, this.sendStateServer);
-      removeReceiveListener(Actions.gameUpdateServer, this.updateStateServer);
+      removeReceiveListener(Actions.gameGet, this.sendServerState);
+      removeReceiveListener(Actions.gameUpdate, this.serverReceiveState);
       removeReceiveListener(Actions.smile, this.onSetSmile);
     } else if (online) {
       if (isConnected()) {
         send(Actions.roomLeave);
       }
 
-      removeReceiveListener(Actions.gameUpdateClient, this.updateState);
+      removeReceiveListener(Actions.gameUpdate, this.updateState);
       removeDisconnectListener(this.newGame);
     }
   }
 
-  onPlayerAdd = (id: string) => {
-    this.addNewShape(id);
-  }
+  onPlayerAdd = (id: string) => this.addNewShape(id);
 
   onPlayerRemove = (id: string) => {
     const { gameShapes } = this.state;
@@ -182,7 +180,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     if (server) {
       this.state = newState;
-      this.sendStateServer();
+      this.sendServerState({ player: null, data: state });
 
       if (callback) {
         callback();
@@ -192,7 +190,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
-  updateStateServer = ({ player, data }: IData<IGameControl>) => {
+  serverReceiveState = ({ player, data }: IData<IGameControl>) => {
     const { gameShapes } = this.state;
     const shapeIndex = player.id;
 
@@ -209,18 +207,28 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     if (direction) {
       this.move(direction, shapeIndex);
     }
-
-    this.sendStateServer();
   }
 
-  sendState = (data: IGameControl) => send(Actions.gameUpdateServer, data);
+  sendControlToServer = (data: IGameControl) => send(Actions.gameUpdate, data);
 
-  sendStateServer = () => {
+  sendServerState = ({ player, data }: IData<IGameState>) => {
     const { room } = this.props;
+    const { field, gameShapes, gameOver, stats, timeShapeMove } = this.state;
+    const dataToSend = data || {
+      field,
+      gameOver,
+      gameShapes,
+      stats,
+      timeShapeMove,
+    };
 
-    room.players.forEach(player =>
-      player.send(Actions.gameUpdateClient, this.state),
-    );
+    if (player) {
+      player.send(Actions.gameUpdate, dataToSend);
+    } else {
+      room.players.forEach(player =>
+        player.send(Actions.gameUpdate, dataToSend),
+      );
+    }
   }
 
   newGame = () => {
@@ -262,10 +270,13 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     const shapeTemplates = Object.values(shapes);
     const allGameShapes = Object.values(shapesNew);
-    const gameShapesCount = allGameShapes.length;
     const randomShapeCells = [...shapeTemplates[random(shapeTemplates.length)]];
     const randomAngle = random(4) * 90;
-    const color = shapeOld ? shapeOld.color : COLORS_ORDER[gameShapesCount];
+    const color = shapeOld
+      ? shapeOld.color
+      : COLORS_ORDER.find(
+        color => !allGameShapes.some(shape => shape.color === color),
+      );
 
     const shape: IShape = {
       id: uuid(),
@@ -311,7 +322,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const { online } = this.props;
 
     if (online) {
-      this.sendState({ direction });
+      this.sendControlToServer({ direction });
       return;
     }
 
@@ -350,7 +361,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const { online } = this.props;
 
     if (online) {
-      this.sendState({ angle });
+      this.sendControlToServer({ angle });
       return;
     }
 
