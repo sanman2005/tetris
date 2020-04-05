@@ -7,6 +7,8 @@ interface IControlProps {
 
 const TOUCH_MOVE_MIN_DISTANCE = 10;
 
+type TEvent = TouchEvent & { clientX: number; clientY: number };
+
 export default class Control extends React.Component<IControlProps> {
   touchX = 0;
   touchY = 0;
@@ -18,7 +20,7 @@ export default class Control extends React.Component<IControlProps> {
     this.props.onKeyDown(event.code);
   }
 
-  onTouchStart = (event: any) => {
+  onTouchStart = (event: TEvent) => {
     const { touchTarget } = this.props;
 
     if (touchTarget && event.target !== touchTarget) {
@@ -32,7 +34,7 @@ export default class Control extends React.Component<IControlProps> {
     this.touching = true;
   }
 
-  onTouchMove = (event: any) => {
+  onTouchMove = (event: TEvent) => {
     const { onKeyDown, touchTarget } = this.props;
 
     if (!this.touching || (touchTarget && event.target !== touchTarget)) {
@@ -54,9 +56,13 @@ export default class Control extends React.Component<IControlProps> {
     }
   }
 
-  onTouchEnd = () => {
+  onTouchEnd = (event: TEvent) => {
     if (!this.moving) {
-      this.props.onKeyDown('Space');
+      const { touchTarget } = this.props;
+
+      if (!touchTarget || event.target === touchTarget) {
+        this.props.onKeyDown('Space');
+      }
     }
 
     this.moving = this.touching = false;
