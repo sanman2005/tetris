@@ -5,9 +5,12 @@
     position relative
     text-align center
 
-  &__stats
-    flex(row, nowrap)
+  &__stat
+    flex(row, nowrap, flex-start)
     line-height 1
+
+    & + &
+      margin-top 10px
 
     +below('xs')
       align-items flex-end

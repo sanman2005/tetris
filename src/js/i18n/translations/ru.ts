@@ -70,6 +70,7 @@ export default {
   roomSettings: 'настройки комнаты',
   rowsRemoved: 'удалено строк',
   save: 'сохранить',
+  score: 'счет',
   signin: 'вход',
   signup: 'регистрация',
   start: 'старт',

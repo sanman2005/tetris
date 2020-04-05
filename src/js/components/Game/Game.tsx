@@ -24,10 +24,25 @@ import Smile, { Smiles } from './Smile';
 import { correctShapeFieldPosition, getPositionKey, pointRotate } from './GameHelpers';
 
 const CELL_SIZE = 30;
-const TIME_SHAPE_MOVE_MAX = 1;
+const SCORE_ROW_REMOVE = 10;
+const SCORE_ROW_REMOVE_KOEF = 20;
+const TIME_SHAPE_MOVE_START = 1;
 const TIME_KEY_HANDLER_DELAY = 0.05;
 const MY_SHAPE_INDEX = 'my';
 const COLORS_ORDER = [Colors.blue, Colors.yellow, Colors.red];
+
+const TIME_SHAPE_BY_FILLED_ROWS: { [key: string]: number } = {
+  0: TIME_SHAPE_MOVE_START,
+  2: TIME_SHAPE_MOVE_START * .9,
+  5: TIME_SHAPE_MOVE_START * .8,
+  9: TIME_SHAPE_MOVE_START * .7,
+  14: TIME_SHAPE_MOVE_START * .6,
+  20: TIME_SHAPE_MOVE_START * .5,
+  27: TIME_SHAPE_MOVE_START * .4,
+  35: TIME_SHAPE_MOVE_START * .3,
+  44: TIME_SHAPE_MOVE_START * .2,
+  80: TIME_SHAPE_MOVE_START * .1,
+};
 
 export interface IGame {
   start: () => void;
@@ -43,6 +58,7 @@ interface IGameControl {
 
 interface IGameStats {
   rowsRemoved: number;
+  score: number;
 }
 
 interface IGameProps {
@@ -71,8 +87,9 @@ const INITIAL_STATE: IGameState = {
   gameShapes: {},
   stats: {
     rowsRemoved: 0,
+    score: 0,
   },
-  timeShapeMove: TIME_SHAPE_MOVE_MAX,
+  timeShapeMove: TIME_SHAPE_MOVE_START,
 };
 
 export default class Game extends React.Component<IGameProps, IGameState> {
@@ -448,10 +465,28 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       }
     }
 
-    this.updateState({
-      field: { ...field, filledCells: newFilledCells },
-      stats: { ...stats, rowsRemoved: stats.rowsRemoved + removedRowsCount },
-    });
+    if (removedRowsCount) {
+      this.updateState({
+        field: { ...field, filledCells: newFilledCells },
+        stats: {
+          ...stats,
+          rowsRemoved: stats.rowsRemoved + removedRowsCount,
+          score:
+            stats.score +
+            removedRowsCount * SCORE_ROW_REMOVE +
+            (removedRowsCount - 1) * SCORE_ROW_REMOVE_KOEF,
+        },
+      }, this.updateShapesMoveTime);
+    }
+  }
+
+  updateShapesMoveTime = () => {
+    const { rowsRemoved } = this.state.stats;
+    const timeShapeMove = TIME_SHAPE_BY_FILLED_ROWS[rowsRemoved];
+
+    if (timeShapeMove) {
+      this.updateState({ timeShapeMove });
+    }
   }
 
   moveShapesOnTimer = () => {
@@ -498,6 +533,9 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     this.playerSmiles[player.id] = smile;
   }
 
+  getFieldRef = (ref: HTMLDivElement) =>
+    !this.state.fieldElement && this.setState({ fieldElement: ref});
+
   renderSmiles = () => (
     <div className='game__smiles'>
       {[Smiles.hi, Smiles.smile, Smiles.sadness].map(smile => (
@@ -515,8 +553,18 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     </div>
   )
 
-  getFieldRef = (ref: HTMLDivElement) =>
-    !this.state.fieldElement && this.setState({ fieldElement: ref});
+  renderStats = ({ rowsRemoved, score } = this.state.stats) => (
+    <div className='game__stats'>
+      <div className='game__stat'>
+        <div className='game__stat-label'>{i18n`rowsRemoved`}:</div>
+        <div className='game__stat-value'>{rowsRemoved}</div>
+      </div>
+      <div className='game__stat'>
+        <div className='game__stat-label'>{i18n`score`}:</div>
+        <div className='game__stat-value'>{score}</div>
+      </div>
+    </div>
+  );
 
   render() {
     const { online } = this.props;
@@ -553,10 +601,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         </div>
 
         <div className='game__side'>
-          <div className='game__stats'>
-            <div className='game__stats-label'>{i18n`rowsRemoved`}:</div>
-            <div className='game__stats-value'>{stats.rowsRemoved}</div>
-          </div>
+          {this.renderStats()}
           {online && this.renderSmiles()}
         </div>
       </Content>
