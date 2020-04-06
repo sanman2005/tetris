@@ -19,6 +19,7 @@ import Control from 'components/Control';
 import { Content } from 'components/Grid';
 
 import Field, { IField } from './Parts/Field';
+import Help from './Parts/Help';
 import Shape, { Colors, IShape, IVector, shapes } from './Parts/Shape';
 import Smile, { Smiles } from './Parts/Smile';
 import { correctShapeFieldPosition, getPositionKey, pointRotate } from './GameHelpers';
@@ -74,6 +75,7 @@ interface IGameState {
   fieldElement?: HTMLDivElement;
   gameOver?: boolean;
   gameShapes?: { [key: string]: IShape };
+  help?: boolean;
   stats?: IGameStats;
   timeShapeMove?: number;
 }
@@ -85,6 +87,7 @@ const INITIAL_STATE: IGameState = {
   },
   gameOver: false,
   gameShapes: {},
+  help: false,
   stats: {
     rowsRemoved: 0,
     score: 0,
@@ -255,6 +258,9 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     clearTimeout(this.timeoutShapeMove);
     this.updateState({ gameOver: true });
   }
+
+  onHelp = () => this.setState({ help: true });
+  onHelpClose = () => this.setState({ help: false });
 
   addNewShape = (shapeIndex = MY_SHAPE_INDEX) => {
     const { field, gameOver, gameShapes } = this.state;
@@ -574,7 +580,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   render() {
     const { onBack, online } = this.props;
-    const { field, fieldElement, gameOver, gameShapes } = this.state;
+    const { field, fieldElement, gameOver, gameShapes, help } = this.state;
 
     return (
       <Content className={cn('game', { 'game--over': gameOver })}>
@@ -609,6 +615,13 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         <div className='game__side'>
           {this.renderStats()}
           {online && this.renderSmiles()}
+          {help && <Help onClose={this.onHelpClose} />}
+          <Button
+            className='game__help'
+            text='?'
+            type='light'
+            onClick={this.onHelp}
+          />
         </div>
       </Content>
     );

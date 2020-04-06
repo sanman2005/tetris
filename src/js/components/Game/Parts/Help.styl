@@ -1,0 +1,157 @@
+.help
+  flex(column, nowrap, flex-start, align-items, stretch)
+  height 100%
+  text-align center
+
+  &__title
+    itemDesc()
+
+  &__subtitle
+    textSize(18px)
+    margin-top $columnPadding
+
+  .row
+    flex-grow 1
+    padding-bottom $columnPadding
+    scrollbar()
+
+  &__content
+    margin-top $columnPadding
+
+    +below('sm')
+      display none
+
+    @media (max-width $breakPointMobileDevice)
+      display none
+
+    &-mobile
+      margin-top $columnPadding
+
+      @media (min-width $breakPointMobileDevice + 1)
+        display none
+
+  &__delimiter
+    margin-bottom $columnPadding
+
+  &__keys
+    flex()
+    justify-content center
+
+    .button
+      width auto
+      margin 6px
+
+      &.help__space
+        width 50%
+
+        &::after
+          content ''
+          display block
+          width 30px
+          height 10px
+          border 4px solid $colorMain1
+          border-top none
+          filter drop-shadow(-1px -1px 1px $colorGray1)
+          transition(all, .1s)
+
+        &:hover::after
+          border-color $colorMain2
+          filter drop-shadow(1px 1px 1px $colorGray1)
+
+  &__mouse
+    width 150px
+    height 200px
+    margin auto
+    shadow($colorShadowLight, 20px)
+    border-radius 100%
+
+    &--move
+      animation 2s infinite linear mouse-move
+
+    &-key
+      position absolute
+      width 45%
+      top 5%
+      height 50%
+      shadowBorder(2px, $borderRadius, true)
+      cursor pointer
+
+      &--down
+      &:hover
+        shadowBorder(1px, $borderRadius)
+
+      &--click
+        animation 1.5s infinite linear key-click
+
+      &:first-child
+        left 3%
+        border-top-left-radius 100%
+
+      &:last-child
+        right 2%
+        border-top-right-radius 100%
+
+  $screenHeight = 300px
+
+  &__screen
+    position relative
+    width 100%
+    height $screenHeight
+    shadowBorder()
+    overflow hidden
+
+  &__finger
+    $height = 70px
+    position absolute
+    width $screenHeight
+    height $height
+    left 30%
+    bottom -10%
+    background-color $colorOrange
+    border-radius $height * .5
+    transform rotateZ(60deg)
+    will-change left
+    shadowSimple()
+
+    &::before
+      content ''
+      display block
+      width 60px
+      height calc(100% - 6px)
+      margin-top 2px
+      margin-left -1px
+      border-radius $height * .5
+      border-top-right-radius 50%
+      border-bottom-right-radius 50%
+      background-color $colorWhite
+
+    &--move
+      animation 2s infinite linear finger-move
+
+    &--click
+      animation 1.5s infinite linear finger-click
+
+  @keyframes mouse-move
+    0%
+      transform translateX(0)
+    25%
+      transform translateX(-20%)
+    75%
+      transform translateX(20%)
+
+  @keyframes key-click
+    20%
+      shadowBorder(1px, $borderRadius)
+      border-top-left-radius 100%
+
+  @keyframes finger-move
+    0%
+      left 30%
+    25%
+      left 20%
+    75%
+      left 40%
+
+  @keyframes finger-click
+    20%
+      transform rotateZ(60deg) scale(.9)

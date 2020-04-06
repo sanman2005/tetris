@@ -1,9 +1,9 @@
 .modal
   &-content
     height 100%
-    padding 60px
+    padding $columnPadding
     overflow hidden
-    shadow($colorShadowLight, 12px, true)
+    shadow($colorShadowLight, 12px)
 
     +above('sm')
       padding 20px
@@ -13,10 +13,11 @@
 
   &-close
     position absolute
-    top 60px
-    right 60px
+    top $columnPadding
+    right @top
     width 38px
     height 38px
+    padding 10px
     cursor pointer
     z-index 1
 
@@ -28,11 +29,11 @@
       height 100%
 
       *
-        fill $colorGray6
+        fill $colorMain1
         transition()
 
     &:hover svg *
-      fill $colorMain1
+      fill $colorMain2
 
 .ReactModal__Overlay
   background-color $colorBackMain !important

@@ -1,13 +1,16 @@
-buttonColor($color, $hoverColor = $color)
-  background-color $color
+buttonColor($backColor, $hoverColor = $backColor, $hoverBackColor = $colorOrange)
+  background-color $backColor
 
   &:hover
-    background-color $colorMain3
+    background-color $hoverBackColor
     color $hoverColor
+
+  &:not(.button--shadow)
+    shadowSimple()
 
   &.button--shadow
     color $colorGray4
-    shadow($color, 7px, true, darken($color, 20%))
+    shadow($backColor, 7px, true, darken($backColor, 20%))
 
   &:active
     color $colorMain2
@@ -47,18 +50,7 @@ buttonColor($color, $hoverColor = $color)
       color $colorMain2
 
   &--main
-    background-color $colorMain1
-
-    &:hover
-      background-color $colorMain2
-
-    &.button--shadow
-      color $colorGray4
-      shadow($colorMain1, 7px, true)
-
-    &:active
-      background-color $colorMain3
-      color $colorMain1
+    buttonColor($colorMain1, $colorWhite)
 
   &--main2
     buttonColor($colorMain2, $colorMain1)

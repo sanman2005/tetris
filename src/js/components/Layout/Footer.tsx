@@ -17,7 +17,7 @@ export default () => (
           <a className='link' href='mailto:sanman@mail.ru'>
             Sanman
           </a>
-          , {year}
+          {year}
         </Column>
         <Column xs={6} className='footer__agreement'>
           {/*<Link to={pagesPath.terms}>{i18n`terms`}</Link>*/}

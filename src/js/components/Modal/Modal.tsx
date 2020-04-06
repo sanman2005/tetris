@@ -1,8 +1,10 @@
 import * as React from 'react';
-import ModalReact from 'react-modal';
+import * as ModalReact from 'react-modal';
 import cn from 'classnames';
+
 import Icons from '../icons';
-import { scrollEnable, scrollDisable } from '../../helpers';
+import { scrollEnable, scrollDisable } from 'js/helpers';
+import Button from 'components/Button';
 
 interface IModalProps {
   children: JSX.Element;
@@ -37,12 +39,11 @@ export default class Modal extends React.Component<IModalProps> {
     return (
       <ModalReact isOpen style={style}>
         {onClose && (
-          <div
+          <Button
             className='modal-close'
-            role='button'
-            onClick={onClose}>
-            <Icons.close />
-          </div>
+            onClick={onClose}
+            icon={<Icons.close />}
+          />
         )}
         <div className={cn('modal-content', { 'modal-content--nopad': noPad })}>
           {children}
