@@ -1,0 +1,77 @@
+.smile
+  &__eyes
+    position absolute
+    fullSize()
+    flex(row, nowrap, space-around, flex-start)
+    padding 0 20%
+
+    &::before
+    &::after
+      content ''
+      display block
+      width 25%
+      height 50%
+      margin-top 20%
+      border-radius 100%
+      background-color $colorWhite
+      background-image radial-gradient($colorBlack 30%, transparent 31%)
+      border-bottom 1px solid $colorBlack
+      animation 2s infinite eye
+
+  &__mouth
+    position absolute
+    fullSize()
+
+  &--hi &__mouth
+  &--smile &__mouth
+    background-image radial-gradient(ellipse at top, transparent 45%, $colorBlack 50%, $colorBlack 52%, transparent 55%)
+    background-repeat no-repeat
+    background-size 70% 30%
+    background-position 50% 40%
+
+  &--sadness &__mouth
+    background-image radial-gradient(ellipse at bottom, transparent 45%, $colorBlack 50%, $colorBlack 52%, transparent 60%)
+    background-repeat no-repeat
+    background-size 60% 20%
+    background-position 50% 40%
+
+
+  &--hi &__hand-right
+    position absolute
+    fullSize()
+    flex()
+    justify-content center
+    background-image radial-gradient(ellipse at center, $colorWhite 40%, transparent 41%)
+    background-repeat no-repeat
+    background-size 40% 80%
+    background-position 50% 50%
+    filter drop-shadow(0 0 1px $colorBlack)
+    animation 1s infinite linear hand
+
+    &::after
+      content ''
+      display block
+      width 15%
+      height 30%
+      border-radius 100%
+      background-color $colorWhite
+      transform rotateZ(-45deg) translate(-90%, -5%)
+
+@keyframes eye
+  0%
+  85%
+    background-color $colorWhite
+    background-image radial-gradient($colorBlack 30%, transparent 31%)
+
+  100%
+    background-color transparent
+    background-image none
+
+@keyframes hand
+  from
+  to
+    transform rotateZ(10deg) translateX(0%)
+
+  50%
+    transform rotateZ(20deg) translateX(10%)
+

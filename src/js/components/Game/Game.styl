@@ -1,0 +1,80 @@
+.game
+  flex(row, nowrap, center, flex-start)
+
+  &__main
+    position relative
+    text-align center
+
+  &__stats
+    padding 'calc(%s * .5)' % $columnPadding
+    shadowBorder(1px, $borderRadius, true)
+    shadowText()
+
+  &__stat
+    flex(row, nowrap)
+    line-height 1
+
+    & + &
+      margin-top 10px
+
+    &-label
+      margin-right 10px
+      color $colorMain1
+
+      +below('xs')
+        margin-right 5px
+        font-size 11px
+
+    &-value
+      font-size 20px
+      font-weight bold
+      color $colorOrange
+
+      +below('xs')
+        font-size 16px
+
+  &:not(&--over) &__over
+    transform scale(0) translate(-100%, -100%)
+    pointer-events none
+
+  &__over
+    position absolute
+    top 50%
+    left 50%
+    transform scale(1) translate(-50%, -50%)
+    transition(transform, 1s)
+    font-size 50px
+    color $colorRed2
+    font-weight 900
+
+    .button
+      margin-top 100px
+
+  &__exit
+    max-width 150px
+    margin 20px auto 0
+
+  &__side
+    padding 0 $columnPadding
+
+  &__smiles
+    margin-top 50px
+
+  &__smile
+    margin-top 20px
+
+    .smile
+      &__eyes
+      &__mouth
+        height 50%
+
+      &__mouth
+        top 50%
+
+      & .smile__hand-right
+        left 80%
+        right -80%
+
+  &__help
+    width auto
+    margin-top 50px

@@ -1,0 +1,47 @@
+.lobby
+  width 100%
+  max-width 700px
+
+  &__disconnect
+    text-align center
+    font-size 20px
+    font-weight bold
+    color $colorRed2
+
+  &__rooms
+    &-list
+      padding $columnPadding
+      min-height 50vh
+      shadowInset(3px)
+
+    .title
+      padding-bottom 20px
+      font-size 20px
+      color $colorTextMain
+
+  &__room
+    & + &
+      margin-top $columnPadding
+
+    &-content
+      flex()
+      shadow($colorShadowLight, 3px)
+      padding $columnPadding
+
+    &-title
+      itemTitle()
+      color $colorMain1
+
+    &-players
+      span
+        margin-left 5px
+        font-size 20px
+        font-weight bold
+        color $colorOrange
+
+    .button
+      max-width 200px
+      color $colorMain2
+
+  &__create
+    margin-top 40px

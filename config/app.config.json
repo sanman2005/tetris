@@ -1,0 +1,26 @@
+{
+  "api": {
+    "host": {
+      "local": "http://127.0.0.1",
+      "development": "http://127.0.0.1",
+      "production": "https://tetris.sanman.ru"
+    }
+  },
+  "social": {
+    "google": {
+      "clientId": ""
+    }
+  },
+  "server": {
+    "host": {
+      "local": "ws://127.0.0.1",
+      "development": "wss://tetris.dev.sanman.ru",
+      "production": "wss://tetris.sanman.ru"
+    },
+    "port": 9000
+  },
+  "ssr": {
+    "serverPort": 8080,
+    "serverStaticRoot": "/static"
+  }
+}
