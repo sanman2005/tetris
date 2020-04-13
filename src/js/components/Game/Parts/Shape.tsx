@@ -18,9 +18,10 @@ export enum Colors {
 
 export interface IShape {
   id?: string;
-  position?: IVector;
   cells: ICell[];
   color?: Colors;
+  frozen?: boolean;
+  position?: IVector;
   smile?: Smiles;
 }
 

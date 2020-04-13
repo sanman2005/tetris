@@ -27,12 +27,24 @@ const checkShapeCellsPosition = (
   onSuccess();
 };
 
+export const getShapeBottom = (shape: IShape) => shape.cells.reduce(
+  (result: number, cell) => Math.max(result, cell.offset.y),
+  0,
+);
+
+export const getShapeTop = (shape: IShape) => shape.cells.reduce(
+  (result: number, cell) => Math.min(result, cell.offset.y),
+  0,
+);
+
 const checkShapesPositionConflict = (
   position: IVector,
   shape: IShape,
   shapes: IShape[],
   onSuccess: (position: IVector) => void,
+  onFail: (position?: IVector) => void,
 ) => {
+  const positionCorrect = { ...position };
   const shapeCells = shape.cells.reduce(
     (result: { [key: string]: IVector }, cell) => {
       const cellPosition = {
@@ -50,7 +62,7 @@ const checkShapesPositionConflict = (
   const checkNextShape = () => {
     let shapeNext = shapes[++shapeIndex];
 
-    if (shapeNext && shapeNext.id === shape.id) {
+    while (shapeNext && (shapeNext.id === shape.id || shapeNext.frozen)) {
       shapeNext = shapes[++shapeIndex];
     }
 
@@ -60,9 +72,10 @@ const checkShapesPositionConflict = (
         shapeCells,
         shapeNext,
         checkNextShape,
+        onFail ? () => onFail() : null,
       );
     } else {
-      onSuccess(position);
+      onSuccess(positionCorrect);
     }
   };
 
@@ -87,10 +100,7 @@ export const correctShapeFieldPosition = (
     (result: number, cell) => Math.max(result, cell.offset.x),
     0,
   );
-  const shapeBottomEdge = shape.cells.reduce(
-    (result: number, cell) => Math.max(result, cell.offset.y),
-    0,
-  );
+  const shapeBottomEdge = getShapeBottom(shape);
 
   if (position.x + shapeLeftEdge < 0) {
     correctPosition.x -= position.x + shapeLeftEdge;
@@ -112,6 +122,10 @@ export const correctShapeFieldPosition = (
       shape,
       shapes,
       () => onSuccess(correctPosition),
+      onStop && positionOld === position ? () => {
+        onSuccess(correctPosition);
+        onStop();
+      } : null,
     );
 
   checkShapeCellsPosition(
@@ -119,7 +133,7 @@ export const correctShapeFieldPosition = (
     field.filledCells,
     shape,
     onCheckFieldCellsSuccess,
-    () => onStop && positionOld.y < position.y && onStop(),
+    () => onStop && onStop(),
   );
 };
 

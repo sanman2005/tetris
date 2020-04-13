@@ -21,6 +21,7 @@ export interface IRoom {
   id: string;
   isFull: boolean;
   isEmpty: boolean;
+  isClosed: boolean;
   game?: IGame;
   options: IRoomOptions;
   players: IPlayer[];
@@ -44,6 +45,7 @@ export const createRoom = (options: IRoomOptions) => {
     id: uuid(),
     players: [],
     options,
+    isClosed: false,
     get isFull() {
       return this.players.length === this.options.playersMax;
     },
@@ -86,7 +88,12 @@ export const createRoom = (options: IRoomOptions) => {
 
       const gameElement = React.createElement(
         Game,
-        { room: this, server: true, onInit },
+        {
+          room: this,
+          server: true,
+          onInit,
+          onEnd: () => (this.isClosed = true),
+        },
         null,
       );
 

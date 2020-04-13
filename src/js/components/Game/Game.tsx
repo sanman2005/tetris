@@ -22,7 +22,12 @@ import Field, { IField } from './Parts/Field';
 import Help from './Parts/Help';
 import Shape, { Colors, IShape, IVector, shapes } from './Parts/Shape';
 import Smile, { Smiles } from './Parts/Smile';
-import { correctShapeFieldPosition, getPositionKey, pointRotate } from './GameHelpers';
+import {
+  correctShapeFieldPosition,
+  getShapeTop,
+  getPositionKey,
+  pointRotate,
+} from './GameHelpers';
 
 const CELL_SIZE = 30;
 const SCORE_ROW_REMOVE = 10;
@@ -65,6 +70,7 @@ interface IGameStats {
 interface IGameProps {
   onInit?: (handlers: IGame) => void;
   onBack?: () => void;
+  onEnd?: () => void;
   online?: boolean;
   room?: IRoom;
   server?: boolean;
@@ -255,8 +261,14 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   }
 
   onGameover = () => {
+    const { onEnd } = this.props;
+
     clearTimeout(this.timeoutShapeMove);
     this.updateState({ gameOver: true });
+
+    if (onEnd) {
+      onEnd();
+    }
   }
 
   onHelp = () => this.setState({ help: true });
@@ -293,7 +305,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       })),
       position: {
         x: random(field.size.x),
-        y: 0,
+        y: -1,
       },
       smile: this.playerSmiles[shapeIndex],
     };
@@ -302,7 +314,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     correctShapeFieldPosition(
       shape.position,
-      { x: shape.position.x, y: -1 },
+      shape.position,
       field,
       shape,
       allGameShapes,
@@ -311,7 +323,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         shapesNew[shapeIndex] = shape;
         this.updateState({ gameShapes: shapesNew });
       },
-      this.onGameover,
+      () => (shape.frozen = true),
     );
   }
 
@@ -353,6 +365,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       shape,
       allGameShapes,
       (position) => {
+        shape.frozen = false;
         shape.position = position;
         this.updateState({ gameShapes: shapesNew });
       },
@@ -408,6 +421,13 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const filledCells = { ...field.filledCells };
     const newShapes = { ...gameShapes };
     const shape = gameShapes[shapeIndex];
+
+    const shapeTop = getShapeTop(shape);
+
+    if (shapeTop + shape.position.y === 0) {
+      this.onGameover();
+      return;
+    }
 
     delete newShapes[shapeIndex];
 
