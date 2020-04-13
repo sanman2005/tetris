@@ -15,7 +15,7 @@ import {
 import { isConnected, send } from 'js/api/socket';
 
 import Button from 'components/Button';
-import Control from 'components/Control';
+import Control, { TControlKeys } from 'components/Control';
 import { Content } from 'components/Grid';
 
 import Field, { IField } from './Parts/Field';
@@ -82,6 +82,7 @@ interface IGameState {
   gameOver?: boolean;
   gameShapes?: { [key: string]: IShape };
   help?: boolean;
+  shapeIndex?: string;
   stats?: IGameStats;
   timeShapeMove?: number;
 }
@@ -94,6 +95,7 @@ const INITIAL_STATE: IGameState = {
   gameOver: false,
   gameShapes: {},
   help: false,
+  shapeIndex: MY_SHAPE_INDEX,
   stats: {
     rowsRemoved: 0,
     score: 0,
@@ -109,6 +111,8 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   keyHandlersTimes: { [key: string]: number } = {};
 
   playerSmiles: { [key: string]: Smiles } = {};
+
+  controlledShape: IShape = null;
 
   constructor(props: IGameProps) {
     super(props);
@@ -227,6 +231,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       field,
       gameOver,
       gameShapes,
+      shapeIndex: player.id,
       stats,
       timeShapeMove,
     };
@@ -234,8 +239,8 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     if (player) {
       player.send(Actions.gameUpdate, dataToSend);
     } else {
-      room.players.forEach(player =>
-        player.send(Actions.gameUpdate, dataToSend),
+      room.players.forEach(roomPlayer =>
+        roomPlayer.send(Actions.gameUpdate, dataToSend),
       );
     }
   }
@@ -290,15 +295,15 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const allGameShapes = Object.values(shapesNew);
     const randomShapeCells = [...shapeTemplates[random(shapeTemplates.length)]];
     const randomAngle = random(4) * 90;
-    const color = shapeOld
+    const shapeColor = shapeOld
       ? shapeOld.color
       : COLORS_ORDER.find(
-        color => !allGameShapes.some(shape => shape.color === color),
+        color => !allGameShapes.some(gameShape => gameShape.color === color),
       );
 
     const shape: IShape = {
       id: uuid(),
-      color,
+      color: shapeColor,
       cells: randomShapeCells.map(cell => ({
         ...cell,
         offset: pointRotate(cell.offset, randomAngle),
@@ -535,16 +540,28 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }, timeShapeMove * 1000);
   }
 
+  onMoveDown = () => {
+    const { shapeIndex, gameShapes } = this.state;
+    const shape = gameShapes[shapeIndex];
+
+    if (this.controlledShape && this.controlledShape !== shape) {
+      return;
+    }
+
+    this.controlledShape = shape;
+    this.moveDown();
+  }
+
   onKeyDown = (key: string) => {
     const { gameOver } = this.state;
     const keyHandlers: { [key: string]: () => void } = {
-      ArrowLeft: this.moveLeft,
-      ArrowRight: this.moveRight,
-      ArrowDown: this.moveDown,
-      KeyA: this.moveLeft,
-      KeyD: this.moveRight,
-      KeyS: this.moveDown,
-      Space: this.rotate,
+      [TControlKeys.ArrowLeft]: this.moveLeft,
+      [TControlKeys.ArrowRight]: this.moveRight,
+      [TControlKeys.ArrowDown]: this.onMoveDown,
+      [TControlKeys.KeyA]: this.moveLeft,
+      [TControlKeys.KeyD]: this.moveRight,
+      [TControlKeys.KeyS]: this.onMoveDown,
+      [TControlKeys.Space]: this.rotate,
     };
     const time = new Date().getTime();
     const timeExpired =
@@ -554,6 +571,12 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     if (!gameOver && keyHandlers[key] && timeExpired) {
       keyHandlers[key]();
       this.keyHandlersTimes[key] = time;
+    }
+  }
+
+  onKeyUp = (key: TControlKeys) => {
+    if ([TControlKeys.ArrowDown, TControlKeys.KeyS].includes(key)) {
+      this.controlledShape = null;
     }
   }
 
@@ -604,7 +627,12 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     return (
       <Content className={cn('game', { 'game--over': gameOver })}>
-        <Control onKeyDown={this.onKeyDown} touchTarget={fieldElement} />
+        <Control
+          onKeyDown={this.onKeyDown}
+          onKeyUp={this.onKeyUp}
+          touchTarget={fieldElement}
+        />
+
         <div className='game__main'>
           <Field
             {...field}

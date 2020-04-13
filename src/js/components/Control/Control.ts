@@ -1,7 +1,20 @@
 import * as React from 'react';
 
+export enum TControlKeys {
+  ArrowLeft = 'ArrowLeft',
+  ArrowRight = 'ArrowRight',
+  ArrowDown = 'ArrowDown',
+  ArrowUp = 'ArrowUp',
+  KeyA = 'KeyA',
+  KeyD = 'KeyD',
+  KeyS = 'KeyS',
+  KeyW = 'KeyW',
+  Space = 'Space',
+}
+
 interface IControlProps {
   onKeyDown: (key: string) => void;
+  onKeyUp: (key: string) => void;
   touchTarget?: HTMLElement;
 }
 
@@ -20,6 +33,11 @@ export default class Control extends React.Component<IControlProps> {
     this.props.onKeyDown(event.code);
   }
 
+  onKeyUp = (event: KeyboardEvent) => {
+    event.stopPropagation();
+    this.props.onKeyUp(event.code);
+  }
+
   onTouchStart = (event: TEvent) => {
     const { touchTarget } = this.props;
 
@@ -27,7 +45,7 @@ export default class Control extends React.Component<IControlProps> {
       return;
     }
 
-    const { clientX, clientY } = event.touches && event.touches[0] || event;
+    const { clientX, clientY } = (event.touches && event.touches[0]) || event;
 
     this.touchX = clientX;
     this.touchY = clientY;
@@ -41,37 +59,49 @@ export default class Control extends React.Component<IControlProps> {
       return;
     }
 
-    const { clientX, clientY } = event.touches && event.touches[0] || event;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const { clientX, clientY } = (event.touches && event.touches[0]) || event;
 
     if (clientX && Math.abs(clientX - this.touchX) >= TOUCH_MOVE_MIN_DISTANCE) {
-      onKeyDown(clientX < this.touchX ? 'ArrowLeft' : 'ArrowRight');
+      onKeyDown(
+        clientX < this.touchX
+          ? TControlKeys.ArrowLeft
+          : TControlKeys.ArrowRight,
+      );
       this.touchX = clientX;
       this.moving = true;
     }
 
     if (clientY && Math.abs(clientY - this.touchY) >= TOUCH_MOVE_MIN_DISTANCE) {
-      onKeyDown(clientY > this.touchY ? 'ArrowDown' : 'ArrowUp');
+      onKeyDown(
+        clientY > this.touchY ? TControlKeys.ArrowDown : TControlKeys.ArrowUp,
+      );
       this.touchY = clientY;
       this.moving = true;
     }
   }
 
   onTouchEnd = (event: TEvent) => {
-    if (!this.moving) {
-      const { touchTarget } = this.props;
+    const { onKeyDown, onKeyUp, touchTarget } = this.props;
 
+    if (!this.moving) {
       if (!touchTarget || event.target === touchTarget) {
-        this.props.onKeyDown('Space');
+        onKeyDown(TControlKeys.Space);
       }
+    } else {
+      onKeyUp(TControlKeys.ArrowDown);
     }
 
     this.moving = this.touching = false;
   }
 
   componentDidMount() {
-    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keydown', this.onKeyDown, { passive: false });
+    window.addEventListener('keyup', this.onKeyUp, { passive: false });
     window.addEventListener('touchstart', this.onTouchStart);
-    window.addEventListener('touchmove', this.onTouchMove);
+    window.addEventListener('touchmove', this.onTouchMove, { passive: false });
     window.addEventListener('touchend', this.onTouchEnd);
     window.addEventListener('mousedown', this.onTouchStart);
     window.addEventListener('mousemove', this.onTouchMove);
@@ -80,6 +110,7 @@ export default class Control extends React.Component<IControlProps> {
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this.onKeyDown);
+    window.removeEventListener('keyup', this.onKeyUp);
     window.removeEventListener('touchstart', this.onTouchStart);
     window.removeEventListener('touchmove', this.onTouchMove);
     window.removeEventListener('touchend', this.onTouchEnd);

@@ -1,6 +1,7 @@
 .lobby
   width 100%
   max-width 700px
+  padding 0 $columnPadding
 
   &__disconnect
     text-align center
@@ -42,6 +43,9 @@
     .button
       max-width 200px
       color $colorMain2
+
+      +below('xs')
+        margin 15px auto 0
 
   &__create
     margin-top 40px

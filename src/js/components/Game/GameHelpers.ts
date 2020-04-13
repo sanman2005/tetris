@@ -133,7 +133,7 @@ export const correctShapeFieldPosition = (
     field.filledCells,
     shape,
     onCheckFieldCellsSuccess,
-    () => onStop && onStop(),
+    () => onStop && positionOld.y < position.y && onStop(),
   );
 };
 
