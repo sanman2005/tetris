@@ -37,6 +37,11 @@ module.exports = {
   output: {
     filename: () => `[name]${isServer ? '' : '.[hash:8]'}.js`,
     publicPath: '/',
+    path: path.resolve(
+      __dirname,
+      '../',
+      isServer ? buildConfig.buildServerPath : buildConfig.buildPath,
+    ),
   },
   target: isServer ? 'node' : 'web',
   resolve: {
@@ -69,17 +74,19 @@ module.exports = {
     dns: 'empty',
   },
   plugins: [
+    new CleanWebpackPlugin(),
     ...(isServer
-      ? [
-          new CleanWebpackPlugin(),
-          new StartServerWebpackPlugin({
-            name: 'server.js',
-            nodeArgs: [],
-            args: [],
-            signal: true,
-            keyboard: true,
-          }),
-        ]
+      ? isProd
+        ? []
+        : [
+            new StartServerWebpackPlugin({
+              name: 'server.js',
+              nodeArgs: [],
+              args: [],
+              signal: true,
+              keyboard: true,
+            }),
+          ]
       : [
           new HtmlWebpackPlugin({
             template: `${srcPath}/static/index.html`,
@@ -117,17 +124,19 @@ module.exports = {
     ),
   ],
   devtool: !isProd && 'source-map',
-  devServer: {
-    historyApiFallback: true,
-    host: '0.0.0.0',
-    hot: !isServer,
-    open: !isServer,
-    overlay: true,
-    port: localPort,
-    publicPath: '/',
-    public: `localhost:${localPort}`,
-    writeToDisk: isServer,
-  },
+  devServer: isDevServer
+    ? {
+        historyApiFallback: true,
+        host: '0.0.0.0',
+        hot: !isServer,
+        open: !isServer,
+        overlay: true,
+        port: localPort,
+        publicPath: '/',
+        public: `localhost:${localPort}`,
+        writeToDisk: isServer,
+      }
+    : {},
   optimization: {
     minimize: isProd,
   },

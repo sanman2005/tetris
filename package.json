@@ -8,7 +8,8 @@
   "scripts": {
     "test": "echo 'Error: no test specified' && exit 1",
     "start": "cross-env NODE_ENV=local webpack-dev-server --config './config/webpack.config.js'",
-    "server": "cross-env NODE_ENV=development cross-env NODE_MODE=server webpack-dev-server --config './config/webpack.config.js'",
+    "server": "cross-env NODE_ENV=local cross-env NODE_MODE=server webpack-dev-server --config './config/webpack.config.js'",
+    "server:production": "cross-env NODE_ENV=production cross-env NODE_MODE=server webpack --config './config/webpack.config.js'",
     "lint": "tslint --project ./config --fix",
     "build:development": "cross-env NODE_ENV=development webpack --config './config/webpack.config.js'",
     "build:production": "cross-env NODE_ENV=production webpack --config './config/webpack.config.js'"

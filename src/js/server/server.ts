@@ -54,3 +54,5 @@ wss.on('connection', (socket: WebSocket) => {
     socket.close();
   }
 });
+
+console.log('\n\n----- Server started! -----\n\n');

@@ -5,7 +5,6 @@ import { server as apiConfig } from '../../../config/app.config.json';
 
 const { production } = apiConfig.host;
 const apiHost: string = (apiConfig.host as any)[env] || production;
-const apiPort: number = apiConfig.port;
 let ws: WebSocket = null;
 
 export const connect = () => {
@@ -13,7 +12,7 @@ export const connect = () => {
     return;
   }
 
-  ws = new WebSocket(`${apiHost}:${apiPort}`);
+  ws = new WebSocket(apiHost);
 
   window.onbeforeunload = function() {
     ws.onclose = () => null;
