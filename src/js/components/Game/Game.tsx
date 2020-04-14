@@ -112,7 +112,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   playerSmiles: { [key: string]: Smiles } = {};
 
-  controlledShape: IShape = null;
+  controlledShapeId = '';
 
   constructor(props: IGameProps) {
     super(props);
@@ -544,11 +544,11 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const { shapeIndex, gameShapes } = this.state;
     const shape = gameShapes[shapeIndex];
 
-    if (this.controlledShape && this.controlledShape !== shape) {
+    if (this.controlledShapeId && this.controlledShapeId !== shape.id) {
       return;
     }
 
-    this.controlledShape = shape;
+    this.controlledShapeId = shape.id;
     this.moveDown();
   }
 
@@ -576,7 +576,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   onKeyUp = (key: TControlKeys) => {
     if ([TControlKeys.ArrowDown, TControlKeys.KeyS].includes(key)) {
-      this.controlledShape = null;
+      this.controlledShapeId = null;
     }
   }
 
