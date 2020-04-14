@@ -631,6 +631,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
           onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}
           touchTarget={fieldElement}
+          blockAxis
         />
 
         <div className='game__main'>

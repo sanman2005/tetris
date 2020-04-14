@@ -13,6 +13,7 @@ export enum TControlKeys {
 }
 
 interface IControlProps {
+  blockAxis?: boolean;
   onKeyDown: (key: string) => void;
   onKeyUp: (key: string) => void;
   touchTarget?: HTMLElement;
@@ -23,6 +24,8 @@ const TOUCH_MOVE_MIN_DISTANCE = 10;
 type TEvent = TouchEvent & { clientX: number; clientY: number };
 
 export default class Control extends React.Component<IControlProps> {
+  blockX = false;
+  blockY = false;
   touchX = 0;
   touchY = 0;
   touching = false;
@@ -53,7 +56,7 @@ export default class Control extends React.Component<IControlProps> {
   }
 
   onTouchMove = (event: TEvent) => {
-    const { onKeyDown, touchTarget } = this.props;
+    const { blockAxis, onKeyDown, touchTarget } = this.props;
 
     if (!this.touching || (touchTarget && event.target !== touchTarget)) {
       return;
@@ -64,7 +67,11 @@ export default class Control extends React.Component<IControlProps> {
 
     const { clientX, clientY } = (event.touches && event.touches[0]) || event;
 
-    if (clientX && Math.abs(clientX - this.touchX) >= TOUCH_MOVE_MIN_DISTANCE) {
+    if (
+      !this.blockX &&
+      clientX &&
+      Math.abs(clientX - this.touchX) >= TOUCH_MOVE_MIN_DISTANCE
+    ) {
       onKeyDown(
         clientX < this.touchX
           ? TControlKeys.ArrowLeft
@@ -72,14 +79,26 @@ export default class Control extends React.Component<IControlProps> {
       );
       this.touchX = clientX;
       this.moving = true;
+
+      if (blockAxis) {
+        this.blockY = true;
+      }
     }
 
-    if (clientY && Math.abs(clientY - this.touchY) >= TOUCH_MOVE_MIN_DISTANCE) {
+    if (
+      !this.blockY &&
+      clientY &&
+      Math.abs(clientY - this.touchY) >= TOUCH_MOVE_MIN_DISTANCE
+    ) {
       onKeyDown(
         clientY > this.touchY ? TControlKeys.ArrowDown : TControlKeys.ArrowUp,
       );
       this.touchY = clientY;
       this.moving = true;
+
+      if (blockAxis) {
+        this.blockX = true;
+      }
     }
   }
 
@@ -95,6 +114,7 @@ export default class Control extends React.Component<IControlProps> {
     }
 
     this.moving = this.touching = false;
+    this.blockX = this.blockY = false;
   }
 
   componentDidMount() {
