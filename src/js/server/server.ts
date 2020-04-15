@@ -23,7 +23,7 @@ wss.on('connection', (socket: WebSocket) => {
 
   const onClose = () => {
     try {
-      if (socket.OPEN) {
+      if (socket.readyState === socket.OPEN) {
         socket.close();
       } else {
         lobby.removePlayer(player);
@@ -54,5 +54,3 @@ wss.on('connection', (socket: WebSocket) => {
     socket.close();
   }
 });
-
-console.log('\n\n----- Server started! -----\n\n');

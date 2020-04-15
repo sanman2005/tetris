@@ -112,7 +112,7 @@ class Lobby {
 
   getPublicRooms = () =>
     Object.values(this.roomsPublic)
-      .filter(room => !room.isFull)
+      .filter(room => !room.isFull && !room.isClosed)
       .slice(0, MAX_ROOMS_COUNT_TO_SEND)
       .map(room => ({
         id: room.id,
