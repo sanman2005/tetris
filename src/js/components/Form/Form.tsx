@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cn from 'classnames';
-import * as equal from 'react-fast-compare';
+import equal from 'react-fast-compare';
 
 import Button, { TButtonType } from '../Button';
 import { CheckBoxAgree } from '../CheckBox/CheckBox';
@@ -21,9 +21,9 @@ export type TFormHandlers = {
 };
 
 export type TFormSubmit = (
-  data: TFormData,
-  onSuccessHook: () => void,
-  onErrorHook: (error: string) => void,
+  data?: TFormData,
+  onSuccessHook?: () => void,
+  onErrorHook?: (error: string) => void,
 ) => void;
 
 type TFields = { [key: string]: JSX.Element };
@@ -60,22 +60,22 @@ interface IFormState {
 class Form extends React.Component<IFormProps, IFormState> {
   static displayName: 'Form';
 
-  fields: TFields;
-  inputs: React.ReactElement[];
-  isValid: () => boolean;
-  inputsData: { [key: string]: any };
-  firstInput: any;
+  fields?: TFields;
+  inputs?: React.ReactElement[];
+  isValid?: () => boolean;
+  inputsData?: { [key: string]: any };
+  firstInput?: any;
 
   constructor(props: IFormProps) {
     super(props);
 
     const { error, fields, validateOnStart } = props;
 
-    this.initInputs(fields, validateOnStart);
+    this.initInputs(fields, !!validateOnStart);
     this.state = {
-      error,
-      status: this.isValid() ? Statuses.ready : Statuses.error,
-      validated: props.validateOnStart,
+      error: error || '',
+      status: this.isValid?.() ? Statuses.ready : Statuses.error,
+      validated: !!props.validateOnStart,
       validInputsLeft: 0,
     };
   }
@@ -90,12 +90,12 @@ class Form extends React.Component<IFormProps, IFormState> {
     if (!equal(prevProps.fields, fields)) {
       this.initInputs(fields, this.state.validated);
       this.setState({
-        status: this.isValid() ? Statuses.ready : Statuses.error,
+        status: this.isValid?.() ? Statuses.ready : Statuses.error,
       });
     }
 
     if (prevProps.error !== error) {
-      this.setState({ error });
+      this.setState({ error: error || '' });
     }
   }
 
@@ -106,7 +106,9 @@ class Form extends React.Component<IFormProps, IFormState> {
   }
 
   onFocus() {
-    document.querySelector('main').scrollTo(0, 0);
+    const mainElement = document.querySelector('main');
+
+    mainElement?.scrollTo(0, 0);
   }
 
   initInputs(fields: TFields, validateOnStart: boolean) {
@@ -139,17 +141,15 @@ class Form extends React.Component<IFormProps, IFormState> {
     this.setState({ error, status: Statuses.ready });
   }
 
-  onSubmit = (event: React.FormEvent<HTMLButtonElement | HTMLFormElement>) => {
+  onSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
     const { fields, onSubmit } = this.props;
 
-    if (this.isValid()) {
+    if (this.isValid?.()) {
       this.setState({ status: Statuses.sending });
 
-      if (onSubmit) {
-        onSubmit(this.inputsData, this.onSuccess, this.onError);
-      }
+      onSubmit?.(this.inputsData, this.onSuccess, this.onError);
     } else if (!this.state.validated) {
       this.initInputs(fields, true);
       this.setState({ validated: true });
@@ -179,7 +179,7 @@ class Form extends React.Component<IFormProps, IFormState> {
       return;
     }
 
-    const newStatus = this.isValid() ? Statuses.ready : Statuses.error;
+    const newStatus = this.isValid?.() ? Statuses.ready : Statuses.error;
 
     if (newStatus !== status) {
       this.setState({ status: newStatus });
@@ -205,12 +205,13 @@ class Form extends React.Component<IFormProps, IFormState> {
     } = this.props;
     const { error, status, validated } = this.state;
     const isButtonDisabled = validated && ![Statuses.ready, Statuses.success].includes(status);
-    const statusesText: { [key: string]: string; } = {
+    const statusesText = {
       [Statuses.sending]: sendingText,
       [Statuses.success]: successText,
       [Statuses.fail]: failText,
-    };
-    const buttonText = statusesText[status] ? statusesText[status] : sendText;
+    } as { [key: string]: string };
+
+    const buttonText = (statusesText[status] as string) || sendText;
     const COMPONENT = this.renderForm;
 
     return (
@@ -232,7 +233,7 @@ class Form extends React.Component<IFormProps, IFormState> {
                 shadow />
             </div>
           )}
-          {buttons && buttons.map((button, index) => (
+          {buttons?.map((button, index) => (
             <div className='form__button' key={index}>{button}</div>
           ))}
         </div>

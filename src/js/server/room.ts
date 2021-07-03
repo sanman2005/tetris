@@ -46,12 +46,15 @@ export const createRoom = (options: IRoomOptions) => {
     players: [],
     options,
     isClosed: false,
+
     get isFull() {
       return this.players.length === this.options.playersMax;
     },
+
     get isEmpty() {
       return !this.players.length;
     },
+
     addPlayer(player) {
       if (this.isFull) {
         throw new Error('room is full');
@@ -63,8 +66,9 @@ export const createRoom = (options: IRoomOptions) => {
 
       player.changeRoom(room);
       this.players.push(player);
-      this.game.playerAdd(player.id);
+      this.game?.playerAdd(player.id);
     },
+
     removePlayer(player) {
       const playerIndex = this.players.indexOf(player);
 
@@ -72,14 +76,15 @@ export const createRoom = (options: IRoomOptions) => {
         throw new Error('player was not found in room');
       }
 
-      this.game.playerRemove(player.id);
+      this.game?.playerRemove(player.id);
       this.players.splice(playerIndex, 1);
       player.changeRoom(null);
 
       if (this.isEmpty) {
-        this.game.end();
+        this.game?.end();
       }
     },
+
     start() {
       const onInit = (game: IGame) => {
         this.game = game;

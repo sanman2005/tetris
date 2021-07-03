@@ -1,16 +1,10 @@
 import * as React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import * as dayjs from 'dayjs';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/ru';
 
 import Layout from 'components/Layout';
 import { PageManager, PageRoute } from 'components/PageManager';
 import Lobby from 'components/Lobby';
-import Login, { Stages } from 'components/Login';
-import Logout from 'components/Logout';
 import Page404 from 'components/NotFound';
-import Profile from 'components/Profile';
 
 import Game from './game';
 import Home from './home';
@@ -21,20 +15,15 @@ import {
   removeLangUpdateListener,
 } from '../i18n';
 
-dayjs.extend(relativeTime);
-dayjs.locale(getLang());
-
 export const pagesPath = {
   game: `/game`,
   lobby: `/lobby`,
-  login: `/${Stages.login}`,
   logout: '/logout',
   profile: '/profile',
 };
 
-class Root extends React.Component<RouteComponentProps & any> {
-  onLangUpdate = () => {
-    dayjs.locale(getLang());
+class Root extends React.Component<RouteComponentProps> {
+  onLangUpdate() {
     this.forceUpdate();
   }
 
@@ -49,22 +38,11 @@ class Root extends React.Component<RouteComponentProps & any> {
   render() {
     return (
       <Layout key={getLang()}>
-        <PageManager key={this.props.location.pathname} isLast>
-          <PageRoute path='/' exact component={Home} theme='home' />
-          <PageRoute
-            path={`${pagesPath.login}/:stage?`}
-            component={Login}
-            theme='login'
-          />
+        <PageManager key={this.props.location.pathname}>
+          <PageRoute path='/' exact component={Home} />
           <PageRoute path={`${pagesPath.game}/:online?`} component={Game} />
-          <PageRoute path={pagesPath.logout} component={Logout} />
           <PageRoute path={pagesPath.lobby} component={Lobby} />
-          <PageRoute
-            path={pagesPath.profile}
-            component={Profile}
-            needAuth
-          />
-          <PageRoute component={Page404} theme='page404' />
+          <PageRoute component={Page404} />
         </PageManager>
       </Layout>
     );

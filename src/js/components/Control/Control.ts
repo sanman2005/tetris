@@ -14,14 +14,14 @@ export enum TControlKeys {
 
 interface IControlProps {
   blockAxis?: boolean;
-  onKeyDown: (key: string) => void;
-  onKeyUp: (key: string) => void;
+  onKeyDown: (key: TControlKeys) => void;
+  onKeyUp: (key: TControlKeys) => void;
   touchTarget?: HTMLElement;
 }
 
 const TOUCH_MOVE_MIN_DISTANCE = 10;
 
-type TEvent = TouchEvent & { clientX: number; clientY: number };
+type TEvent = MouseEvent | TouchEvent;
 
 export default class Control extends React.Component<IControlProps> {
   blockX = false;
@@ -33,13 +33,13 @@ export default class Control extends React.Component<IControlProps> {
 
   onKeyDown = (event: KeyboardEvent) => {
     event.stopPropagation();
-    this.props.onKeyDown(event.code);
-  }
+    this.props.onKeyDown(event.code as TControlKeys);
+  };
 
   onKeyUp = (event: KeyboardEvent) => {
     event.stopPropagation();
-    this.props.onKeyUp(event.code);
-  }
+    this.props.onKeyUp(event.code as TControlKeys);
+  };
 
   onTouchStart = (event: TEvent) => {
     const { touchTarget } = this.props;
@@ -48,12 +48,13 @@ export default class Control extends React.Component<IControlProps> {
       return;
     }
 
-    const { clientX, clientY } = (event.touches && event.touches[0]) || event;
+    const { clientX, clientY } =
+      (event as TouchEvent).touches?.[0] || (event as MouseEvent);
 
     this.touchX = clientX;
     this.touchY = clientY;
     this.touching = true;
-  }
+  };
 
   onTouchMove = (event: TEvent) => {
     const { blockAxis, onKeyDown, touchTarget } = this.props;
@@ -65,7 +66,8 @@ export default class Control extends React.Component<IControlProps> {
     event.preventDefault();
     event.stopPropagation();
 
-    const { clientX, clientY } = (event.touches && event.touches[0]) || event;
+    const { clientX, clientY } =
+      (event as TouchEvent).touches?.[0] || (event as MouseEvent);
 
     if (
       !this.blockX &&
@@ -100,7 +102,7 @@ export default class Control extends React.Component<IControlProps> {
         this.blockX = true;
       }
     }
-  }
+  };
 
   onTouchEnd = (event: TEvent) => {
     const { onKeyDown, onKeyUp, touchTarget } = this.props;
@@ -115,7 +117,7 @@ export default class Control extends React.Component<IControlProps> {
 
     this.moving = this.touching = false;
     this.blockX = this.blockY = false;
-  }
+  };
 
   componentDidMount() {
     window.addEventListener('keydown', this.onKeyDown, { passive: false });

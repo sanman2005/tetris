@@ -22,7 +22,7 @@ export interface ColumnProps {
   lg?: number;
 }
 
-type TRef = React.RefObject<HTMLDivElement>;
+type TRef = React.Ref<HTMLDivElement>;
 
 // tslint:disable-next-line:variable-name
 export const Container = React.forwardRef<

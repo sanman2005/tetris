@@ -5,6 +5,8 @@ services:
       context: ../..
       dockerfile: config/docker/app/Dockerfile
     container_name: tetris-app
+    environment:
+      - NODE_ENV=production
     ports:
       - 81:9000
     dns:

@@ -28,6 +28,7 @@ import {
   getPositionKey,
   pointRotate,
 } from './GameHelpers';
+import { IPlayer } from '../../server/player';
 
 const CELL_SIZE = 30;
 const SCORE_ROW_REMOVE = 10;
@@ -39,15 +40,17 @@ const COLORS_ORDER = [Colors.blue, Colors.yellow, Colors.red];
 
 const TIME_SHAPE_BY_FILLED_ROWS: { [key: string]: number } = {
   0: TIME_SHAPE_MOVE_START,
-  2: TIME_SHAPE_MOVE_START * .9,
-  5: TIME_SHAPE_MOVE_START * .8,
-  9: TIME_SHAPE_MOVE_START * .7,
-  14: TIME_SHAPE_MOVE_START * .6,
-  20: TIME_SHAPE_MOVE_START * .5,
-  27: TIME_SHAPE_MOVE_START * .4,
-  35: TIME_SHAPE_MOVE_START * .3,
-  44: TIME_SHAPE_MOVE_START * .2,
-  80: TIME_SHAPE_MOVE_START * .1,
+  2: TIME_SHAPE_MOVE_START * 0.9,
+  5: TIME_SHAPE_MOVE_START * 0.8,
+  9: TIME_SHAPE_MOVE_START * 0.7,
+  14: TIME_SHAPE_MOVE_START * 0.6,
+  20: TIME_SHAPE_MOVE_START * 0.5,
+  27: TIME_SHAPE_MOVE_START * 0.4,
+  35: TIME_SHAPE_MOVE_START * 0.3,
+  44: TIME_SHAPE_MOVE_START * 0.2,
+  80: TIME_SHAPE_MOVE_START * 0.17,
+  120: TIME_SHAPE_MOVE_START * 0.14,
+  150: TIME_SHAPE_MOVE_START * 0.11,
 };
 
 export interface IGame {
@@ -77,14 +80,14 @@ interface IGameProps {
 }
 
 interface IGameState {
-  field?: IField;
+  field: IField;
   fieldElement?: HTMLDivElement;
-  gameOver?: boolean;
-  gameShapes?: { [key: string]: IShape };
-  help?: boolean;
-  shapeIndex?: string;
-  stats?: IGameStats;
-  timeShapeMove?: number;
+  gameOver: boolean;
+  gameShapes: { [key: string]: IShape };
+  help: boolean;
+  shapeIndex: string;
+  stats: IGameStats;
+  timeShapeMove: number;
 }
 
 const INITIAL_STATE: IGameState = {
@@ -106,7 +109,7 @@ const INITIAL_STATE: IGameState = {
 export default class Game extends React.Component<IGameProps, IGameState> {
   state = { ...INITIAL_STATE };
 
-  timeoutShapeMove: NodeJS.Timeout = null;
+  timeoutShapeMove?: NodeJS.Timeout;
 
   keyHandlersTimes: { [key: string]: number } = {};
 
@@ -138,7 +141,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     if (online) {
       if (!isConnected()) {
-        onBack();
+        onBack?.();
         return;
       }
 
@@ -157,7 +160,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
   onEnd = () => {
     const { online, server } = this.props;
 
-    clearTimeout(this.timeoutShapeMove);
+    this.timeoutShapeMove && clearTimeout(this.timeoutShapeMove);
 
     if (server) {
       removeReceiveListener(Actions.gameGet, this.sendServerState);
@@ -171,7 +174,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       removeReceiveListener(Actions.gameUpdate, this.updateState);
       removeDisconnectListener(this.newGame);
     }
-  }
+  };
 
   onPlayerAdd = (id: string) => this.addNewShape(id);
 
@@ -182,9 +185,9 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     delete newShapes[id];
 
     this.updateState({ gameShapes: newShapes });
-  }
+  };
 
-  updateState = (state: IGameState, callback?: () => void) => {
+  updateState = (state: Partial<IGameState>, callback?: () => void) => {
     const { server } = this.props;
     const newState = {
       ...this.state,
@@ -193,21 +196,19 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     if (server) {
       this.state = newState;
-      this.sendServerState({ player: null, data: state });
+      this.sendServerState({ data: state });
 
-      if (callback) {
-        callback();
-      }
+      callback?.();
     } else {
       this.setState(newState, callback);
     }
-  }
+  };
 
   serverReceiveState = ({ player, data }: IData<IGameControl>) => {
     const { gameShapes } = this.state;
-    const shapeIndex = player.id;
+    const shapeIndex = player?.id;
 
-    if (!gameShapes[shapeIndex]) {
+    if (!shapeIndex || !gameShapes[shapeIndex]) {
       return;
     }
 
@@ -220,18 +221,24 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     if (direction) {
       this.move(direction, shapeIndex);
     }
-  }
+  };
 
   sendControlToServer = (data: IGameControl) => send(Actions.gameUpdate, data);
 
-  sendServerState = ({ player, data }: IData<IGameState>) => {
+  sendServerState = ({
+    data,
+    player,
+  }: {
+    data: Partial<IGameState>;
+    player?: IPlayer;
+  }) => {
     const { room } = this.props;
     const { field, gameShapes, gameOver, stats, timeShapeMove } = this.state;
     const dataToSend = data || {
       field,
       gameOver,
       gameShapes,
-      shapeIndex: player.id,
+      shapeIndex: player?.id,
       stats,
       timeShapeMove,
     };
@@ -239,42 +246,43 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     if (player) {
       player.send(Actions.gameUpdate, dataToSend);
     } else {
-      room.players.forEach(roomPlayer =>
+      room?.players.forEach((roomPlayer) =>
         roomPlayer.send(Actions.gameUpdate, dataToSend),
       );
     }
-  }
+  };
 
   newGame = () => {
     const { onBack, online, server } = this.props;
 
     if (online) {
-      onBack();
+      onBack?.();
       return;
     }
 
-    this.updateState({
-      ...INITIAL_STATE,
-      field: { ...this.state.field, filledCells: {} },
-    }, () => {
-      if (!server) {
-        this.addNewShape();
-      }
+    this.updateState(
+      {
+        ...INITIAL_STATE,
+        field: { ...this.state.field, filledCells: {} },
+      },
+      () => {
+        if (!server) {
+          this.addNewShape();
+        }
 
-      this.moveShapesOnTimer();
-    });
-  }
+        this.moveShapesOnTimer();
+      },
+    );
+  };
 
   onGameover = () => {
     const { onEnd } = this.props;
 
-    clearTimeout(this.timeoutShapeMove);
+    this.timeoutShapeMove && clearTimeout(this.timeoutShapeMove);
     this.updateState({ gameOver: true });
 
-    if (onEnd) {
-      onEnd();
-    }
-  }
+    onEnd?.();
+  };
 
   onHelp = () => this.setState({ help: true });
   onHelpClose = () => this.setState({ help: false });
@@ -298,16 +306,18 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const shapeColor = shapeOld
       ? shapeOld.color
       : COLORS_ORDER.find(
-        color => !allGameShapes.some(gameShape => gameShape.color === color),
-      );
+          (color) =>
+            !allGameShapes.some((gameShape) => gameShape.color === color),
+        );
 
     const shape: IShape = {
       id: uuid(),
-      color: shapeColor,
-      cells: randomShapeCells.map(cell => ({
+      color: shapeColor!,
+      cells: randomShapeCells.map((cell) => ({
         ...cell,
         offset: pointRotate(cell.offset, randomAngle),
       })),
+      frozen: false,
       position: {
         x: random(field.size.x),
         y: -1,
@@ -330,16 +340,16 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       },
       () => (shape.frozen = true),
     );
-  }
+  };
 
   moveLeft = (shapeIndex = MY_SHAPE_INDEX) =>
-    this.move({ x: -1, y: 0 }, shapeIndex)
+    this.move({ x: -1, y: 0 }, shapeIndex);
 
   moveRight = (shapeIndex = MY_SHAPE_INDEX) =>
-    this.move({ x: 1, y: 0 }, shapeIndex)
+    this.move({ x: 1, y: 0 }, shapeIndex);
 
   moveDown = (shapeIndex = MY_SHAPE_INDEX) =>
-    this.move({ x: 0, y: 1 }, shapeIndex)
+    this.move({ x: 0, y: 1 }, shapeIndex);
 
   move = (direction: IVector, shapeIndex = MY_SHAPE_INDEX) => {
     const { online } = this.props;
@@ -354,9 +364,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     const shapesNew = { ...gameShapes };
     const shape = shapesNew[shapeIndex];
 
-    if (!shape) {
-      return;
-    }
+    if (!shape) return;
 
     const shapeNewPosition = {
       x: shape.position.x + Math.max(-1, Math.min(Math.floor(direction.x), 1)),
@@ -379,7 +387,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         this.addNewShape(shapeIndex);
       },
     );
-  }
+  };
 
   rotate = (shapeIndex = MY_SHAPE_INDEX, angle = 90) => {
     const { online } = this.props;
@@ -398,7 +406,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     const shapeNew = {
       ...shape,
-      cells: shape.cells.map(cell => ({
+      cells: shape.cells.map((cell) => ({
         ...cell,
         offset: pointRotate(cell.offset, angle),
       })),
@@ -419,13 +427,15 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         this.updateState({ gameShapes: shapesNew });
       },
     );
-  }
+  };
 
   fillFieldCells = (shapeIndex = MY_SHAPE_INDEX) => {
     const { field, gameShapes } = this.state;
     const filledCells = { ...field.filledCells };
     const newShapes = { ...gameShapes };
     const shape = gameShapes[shapeIndex];
+
+    if (!shape) return;
 
     const shapeTop = getShapeTop(shape);
 
@@ -459,7 +469,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       },
       this.removeFilledRows,
     );
-  }
+  };
 
   removeFilledRows = () => {
     const { field, stats } = this.state;
@@ -469,7 +479,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     let removedRowsCount = 0;
 
     Object.values(filledCells).forEach(
-      cell =>
+      (cell) =>
         cell && (rowsFillCount[cell.y] = 1 + (rowsFillCount[cell.y] || 0)),
     );
 
@@ -503,19 +513,22 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
 
     if (removedRowsCount) {
-      this.updateState({
-        field: { ...field, filledCells: newFilledCells },
-        stats: {
-          ...stats,
-          rowsRemoved: stats.rowsRemoved + removedRowsCount,
-          score:
-            stats.score +
-            removedRowsCount * SCORE_ROW_REMOVE +
-            (removedRowsCount - 1) * SCORE_ROW_REMOVE_KOEF,
+      this.updateState(
+        {
+          field: { ...field, filledCells: newFilledCells },
+          stats: {
+            ...stats,
+            rowsRemoved: stats.rowsRemoved + removedRowsCount,
+            score:
+              stats.score +
+              removedRowsCount * SCORE_ROW_REMOVE +
+              (removedRowsCount - 1) * SCORE_ROW_REMOVE_KOEF,
+          },
         },
-      }, this.updateShapesMoveTime);
+        this.updateShapesMoveTime,
+      );
     }
-  }
+  };
 
   updateShapesMoveTime = () => {
     const { rowsRemoved } = this.state.stats;
@@ -524,7 +537,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     if (timeShapeMove) {
       this.updateState({ timeShapeMove });
     }
-  }
+  };
 
   moveShapesOnTimer = () => {
     const { gameShapes, gameOver, timeShapeMove } = this.state;
@@ -534,11 +547,11 @@ export default class Game extends React.Component<IGameProps, IGameState> {
     }
 
     this.timeoutShapeMove = setTimeout(() => {
-      Object.keys(gameShapes).forEach(key => this.moveDown(key));
+      Object.keys(gameShapes).forEach((key) => this.moveDown(key));
 
       this.moveShapesOnTimer();
     }, timeShapeMove * 1000);
-  }
+  };
 
   onMoveDown = () => {
     const { shapeIndex, gameShapes } = this.state;
@@ -550,11 +563,11 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     this.controlledShapeId = shape.id;
     this.moveDown();
-  }
+  };
 
   onKeyDown = (key: string) => {
     const { gameOver } = this.state;
-    const keyHandlers: { [key: string]: () => void } = {
+    const keyHandlers = {
       [TControlKeys.ArrowLeft]: this.moveLeft,
       [TControlKeys.ArrowRight]: this.moveRight,
       [TControlKeys.ArrowDown]: this.onMoveDown,
@@ -562,38 +575,41 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       [TControlKeys.KeyD]: this.moveRight,
       [TControlKeys.KeyS]: this.onMoveDown,
       [TControlKeys.Space]: this.rotate,
-    };
+    } as { [key: string]: () => void };
     const time = new Date().getTime();
     const timeExpired =
       !this.keyHandlersTimes[key] ||
       time - this.keyHandlersTimes[key] >= TIME_KEY_HANDLER_DELAY * 1000;
+    const keyHandler = keyHandlers[key] as () => void;
 
-    if (!gameOver && keyHandlers[key] && timeExpired) {
-      keyHandlers[key]();
+    if (!gameOver && keyHandler && timeExpired) {
+      keyHandler();
       this.keyHandlersTimes[key] = time;
     }
-  }
+  };
 
   onKeyUp = (key: TControlKeys) => {
     if ([TControlKeys.ArrowDown, TControlKeys.KeyS].includes(key)) {
-      this.controlledShapeId = null;
+      this.controlledShapeId = '';
     }
-  }
+  };
 
   onSmile = (smile: Smiles) => send(Actions.smile, { smile });
 
   onSetSmile = ({ player, data }: IData<{ smile: Smiles }>) => {
     const { smile } = data;
 
-    this.playerSmiles[player.id] = smile;
-  }
+    if (smile && player) {
+      this.playerSmiles[player.id] = smile;
+    }
+  };
 
   getFieldRef = (ref: HTMLDivElement) =>
-    !this.state.fieldElement && this.setState({ fieldElement: ref })
+    !this.state.fieldElement && this.setState({ fieldElement: ref });
 
   renderSmiles = () => (
     <div className='game__smiles'>
-      {[Smiles.hi, Smiles.smile, Smiles.sadness].map(smile => (
+      {[Smiles.hi, Smiles.smile, Smiles.sadness].map((smile) => (
         <Button
           className='game__smile'
           onClick={() => this.onSmile(smile)}
@@ -606,7 +622,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         </Button>
       ))}
     </div>
-  )
+  );
 
   renderStats = ({ rowsRemoved, score } = this.state.stats) => (
     <div className='game__stats'>
@@ -619,7 +635,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         <div className='game__stat-value'>{score}</div>
       </div>
     </div>
-  )
+  );
 
   render() {
     const { onBack, online } = this.props;
@@ -635,30 +651,26 @@ export default class Game extends React.Component<IGameProps, IGameState> {
         />
 
         <div className='game__main'>
-          <Field
-            {...field}
-            cellSize={CELL_SIZE}
-            getRef={this.getFieldRef}
-          >
+          <Field {...field} cellSize={CELL_SIZE} getRef={this.getFieldRef}>
             {Object.values(gameShapes).map(
-              shape =>
+              (shape) =>
                 shape && (
                   <Shape {...shape} key={shape.id} fieldSize={field.size} />
                 ),
             )}
           </Field>
-        <div className='game__over'>
-          {i18n`gameOver`}
-          <Button text={i18n`newGame`} type='main' onClick={this.newGame} />
-        </div>
-        {!gameOver && (
-          <Button
-            className='game__exit'
-            text={i18n`exit`}
-            type='light'
-            onClick={onBack}
-          />
-        )}
+          <div className='game__over'>
+            {i18n`gameOver`}
+            <Button text={i18n`newGame`} type='main' onClick={this.newGame} />
+          </div>
+          {!gameOver && (
+            <Button
+              className='game__exit'
+              text={i18n`exit`}
+              type='light'
+              onClick={onBack}
+            />
+          )}
         </div>
 
         <div className='game__side'>

@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": "../",
+    "esModuleInterop": true,
     "experimentalDecorators": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "module": "esnext",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "noImplicitAny": true,
+    "strict": true,
     "paths": {
       "*": ["src/js/*"],
       "api/*": ["src/js/api/*"],
@@ -25,7 +28,7 @@
 
   "exclude": ["node_modules", "**/*.spec.ts"],
 
-  "include": ["../src/js/types.d.ts"],
+  "include": ["src/js/types.d.ts"],
 
   "lib": ["webworker", "dom"]
 }

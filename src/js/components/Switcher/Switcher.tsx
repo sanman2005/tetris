@@ -15,9 +15,11 @@ const switcher = (props: ISwitcherProps) => {
   const { activeIndex, className, items, onSwitch, theme } = props;
 
   return (
-    <div className={cn(className, 'switcher', {
-      [`switcher--${theme}`]: theme,
-    })}>
+    <div
+      className={cn(className, 'switcher', {
+        [`switcher--${theme}`]: theme,
+      })}
+    >
       <List className='switcher-list' grid={!theme} xs={6}>
         {items.map((item, index) => (
           <div
@@ -25,7 +27,7 @@ const switcher = (props: ISwitcherProps) => {
             className={cn('switcher__item', {
               'switcher__item--active': activeIndex === index,
             })}
-            onClick={onSwitch ? () => onSwitch(index) : null}
+            {...(onSwitch && { onClick: () => onSwitch(index) })}
           >
             {item}
           </div>

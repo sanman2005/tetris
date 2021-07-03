@@ -11,7 +11,7 @@ export interface IValidationProps {
     | ((event: React.FormEvent<HTMLInputElement>) => void)
     | ((event: React.FormEvent<HTMLSelectElement>) => void)
     | ((value: any, name?: string) => void);
-  onFocus?: (name: string, element: HTMLElement) => void;
+  onFocus?: (name?: string, element?: HTMLElement) => void;
   onValidate?(result: IValidationResult): void;
   pattern?: string;
   required?: boolean;
@@ -163,7 +163,7 @@ export class ValidationComponent<TProps, TState> extends React.Component<
       throw new Error('validationTexts must be set for component');
     }
 
-    return reason ? validationTexts[reason] : '';
+    return reason && validationTexts?.[reason] || '';
   }
 
   onChangeValue = (value: any) =>

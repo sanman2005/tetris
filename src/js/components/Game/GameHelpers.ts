@@ -6,7 +6,7 @@ const checkShapeCellsPosition = (
   cells: { [key: string]: IVector },
   shape: IShape,
   onSuccess: () => void,
-  onFail?: () => void,
+  onFail?: (() => void) | null,
 ) => {
   for (let i = 0; i < shape.cells.length; i++) {
     const cell = shape.cells[i];
@@ -16,10 +16,7 @@ const checkShapeCellsPosition = (
     };
 
     if (cells[getPositionKey(cellPosition)]) {
-      if (onFail) {
-        onFail();
-      }
-
+      onFail?.();
       return;
     }
   }
@@ -27,22 +24,24 @@ const checkShapeCellsPosition = (
   onSuccess();
 };
 
-export const getShapeBottom = (shape: IShape) => shape.cells.reduce(
-  (result: number, cell) => Math.max(result, cell.offset.y),
-  0,
-);
+export const getShapeBottom = (shape: IShape) =>
+  shape.cells.reduce(
+    (result: number, cell) => Math.max(result, cell.offset.y),
+    0,
+  );
 
-export const getShapeTop = (shape: IShape) => shape.cells.reduce(
-  (result: number, cell) => Math.min(result, cell.offset.y),
-  0,
-);
+export const getShapeTop = (shape: IShape) =>
+  shape.cells.reduce(
+    (result: number, cell) => Math.min(result, cell.offset.y),
+    0,
+  );
 
 const checkShapesPositionConflict = (
   position: IVector,
   shape: IShape,
   shapes: IShape[],
   onSuccess: (position: IVector) => void,
-  onFail: (position?: IVector) => void,
+  onFail: ((position?: IVector) => void) | null,
 ) => {
   const positionCorrect = { ...position };
   const shapeCells = shape.cells.reduce(
@@ -122,10 +121,12 @@ export const correctShapeFieldPosition = (
       shape,
       shapes,
       () => onSuccess(correctPosition),
-      onStop && positionOld === position ? () => {
-        onSuccess(correctPosition);
-        onStop();
-      } : null,
+      onStop && positionOld === position
+        ? () => {
+            onSuccess(correctPosition);
+            onStop();
+          }
+        : null,
     );
 
   checkShapeCellsPosition(

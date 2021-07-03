@@ -5,23 +5,23 @@ import { IRoom } from './room';
 
 export interface IPlayer {
   id: string;
-  changeRoom: (room: IRoom) => void;
-  room: IRoom;
+  changeRoom: (room: IRoom | null) => void;
+  room: IRoom | null;
   send: (action: TAction, data: object) => void;
 }
 
-export default class Player {
-  id: string;
+export default class Player implements IPlayer {
+  id: IPlayer['id'];
   send: IPlayer['send'];
-  room: IRoom;
+  room: IPlayer['room'];
 
-  constructor(send: IPlayer['send'], room?: IRoom) {
+  constructor(send: IPlayer['send'], room: IPlayer['room'] = null) {
     this.id = uuid();
     this.room = room;
     this.send = send;
   }
 
-  changeRoom = (room: IRoom) => {
+  changeRoom = (room: IRoom | null) => {
     this.room = room;
   }
 }

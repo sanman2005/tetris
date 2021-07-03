@@ -43,7 +43,7 @@ class Lobby {
     delete this.players[player.id];
 
     if (player.room) {
-      this.removePlayerFromRoom({ player, data: null });
+      this.removePlayerFromRoom(player);
     }
   }
 
@@ -81,12 +81,12 @@ class Lobby {
     this.sendLobby();
   }
 
-  removePlayerFromRoom = ({ player }: IData) => {
-    const { room } = player;
-
-    if (!room) {
+  removePlayerFromRoom = (player: IPlayer) => {
+    if (!player?.room) {
       throw new Error('player has no room');
     }
+
+    const { room } = player;
 
     room.removePlayer(player);
 

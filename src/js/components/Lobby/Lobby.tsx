@@ -30,7 +30,7 @@ interface ILobbyState {
 
 class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
   state: ILobbyState = {
-    connected: apiSocket.isConnected() || null,
+    connected: apiSocket.isConnected(),
     creating: false,
     error: '',
     rooms: [],
@@ -63,10 +63,10 @@ class Lobby extends React.Component<RouteComponentProps, ILobbyState> {
     this.goToGame();
   }
 
-  create: TFormSubmit = (data, onSuccessHook, onErrorHook) => {
+  create: TFormSubmit = data => {
     const params = {
       ...data,
-      playersMax: data.playersMax ? Constants.roomPlayersMax : 2,
+      playersMax: data?.playersMax ? Constants.roomPlayersMax : 2,
     };
 
     apiSocket.send(Actions.roomCreate, params);
