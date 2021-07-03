@@ -7,7 +7,7 @@ import Constants from 'js/constants';
 import Game, { IGame } from '../components/Game';
 
 export interface IData<T = object> {
-  player: IPlayer;
+  player: IPlayer | null;
   data: T;
 }
 
@@ -63,7 +63,7 @@ export const createRoom = (options: IRoomOptions) => {
 
       player.changeRoom(room);
       this.players.push(player);
-      this.game.playerAdd(player.id);
+      this.game?.playerAdd(player.id);
     },
     removePlayer(player) {
       const playerIndex = this.players.indexOf(player);
@@ -72,12 +72,12 @@ export const createRoom = (options: IRoomOptions) => {
         throw new Error('player was not found in room');
       }
 
-      this.game.playerRemove(player.id);
+      this.game?.playerRemove(player.id);
       this.players.splice(playerIndex, 1);
       player.changeRoom(null);
 
       if (this.isEmpty) {
-        this.game.end();
+        this.game?.end();
       }
     },
     start() {

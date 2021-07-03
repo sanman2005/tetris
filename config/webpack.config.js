@@ -1,7 +1,5 @@
-/* global __dirname */
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const StartServerWebpackPlugin = require('start-server-webpack-plugin');
@@ -20,8 +18,8 @@ if (!env) {
 }
 
 const isProd = env === 'production';
-const isDevServer = process.argv.some(v => v.includes('webpack-dev-server'));
-const localPort = isServer ? 3001 : 3000;
+const isDevServer = process.argv.some((v) => v.includes('webpack-dev-server'));
+const localPort = isServer ? 4001 : 4000;
 
 process.env.APP_MODE = process.env.APP_MODE || 'work';
 
@@ -35,7 +33,6 @@ module.exports = {
         client: path.resolve(srcPath, './js/client.tsx'),
       },
   output: {
-    filename: () => `[name]${isServer ? '' : '.[hash:8]'}.js`,
     publicPath: '/',
     path: path.resolve(
       __dirname,
@@ -63,7 +60,6 @@ module.exports = {
       img: path.resolve(srcPath, './img'),
       js: path.resolve(srcPath, './js'),
       models: path.resolve(srcPath, './js/models'),
-      node: path.resolve(__dirname, '../node_modules'),
       pages: path.resolve(srcPath, './js/pages'),
     },
     mainFields: ['module', 'main'],
@@ -92,11 +88,6 @@ module.exports = {
             template: `${srcPath}/static/index.html`,
             hmr: !isProd,
             scriptLoading: 'defer',
-          }),
-          new MiniCssExtractPlugin({
-            filename: '[name].[hash:8].css',
-            chunkFilename: '[id].css',
-            hmr: !isProd,
           }),
           new CopyWebpackPlugin([
             {
@@ -143,10 +134,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.m?jsx?$/,
-        type: 'javascript/auto',
-      },
-      {
         test: /\.tsx?$/,
         exclude: /node_modules/,
         enforce: 'pre',
@@ -160,20 +147,36 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'awesome-typescript-loader',
+            loader: 'ts-loader',
             options: {
-              configFileName: path.resolve(__dirname, './tsconfig.json'),
+              context: path.resolve(__dirname, '../'),
+              configFile: path.resolve(__dirname, './tsconfig.json'),
             },
           },
           {
-            loader: 'source-map-loader',
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                '@babel/env',
+                // '@babel/preset-env',
+                // '@babel/preset-react',
+                '@babel/preset-typescript',
+              ],
+              plugins: [
+                '@babel/plugin-proposal-class-properties',
+                '@babel/plugin-proposal-object-rest-spread',
+              ],
+            },
           },
+          // {
+          //   loader: 'source-map-loader',
+          // },
         ],
       },
       {
         test: /\.(styl(us)?|css)$/,
         use: [
-          isProd ? MiniCssExtractPlugin.loader : 'style-loader',
+          'style-loader',
           'css-loader',
           {
             loader: 'postcss-loader',
@@ -187,6 +190,13 @@ module.exports = {
       {
         test: /\.svg$/,
         loader: 'svg-react-loader',
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        loader: 'file-loader',
+        options: {
+          emitFile: false,
+        },
       },
     ],
   },

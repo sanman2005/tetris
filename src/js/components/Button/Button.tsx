@@ -13,7 +13,7 @@ export type TButtonShape = 'circle';
 
 interface IButtonProps {
   autosize?: boolean;
-  children?: React.ReactChild | React.ReactChild[];
+  children?: React.ReactNode;
   className?: string;
   disabled?: boolean;
   href?: string;

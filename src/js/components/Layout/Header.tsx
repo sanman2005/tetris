@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
-import { observer } from 'mobx-react';
 import cn from 'classnames';
 
 import { Container } from '../Grid';
@@ -10,10 +9,8 @@ import Link from '../Link';
 import Navigation from '../Navigation';
 import Switcher from '../Switcher';
 
-import { pagesPath } from 'pages/index';
-import Account from 'models/account';
 import { isClient } from 'js/helpers';
-import i18n, { getLang, getLangs, nextLang, setLang } from 'js/i18n';
+import { getLang, getLangs, nextLang, setLang } from 'js/i18n';
 
 type THeaderState = {
   isMenuOpen: boolean;
@@ -23,12 +20,11 @@ type THeaderState = {
 
 const SCROLL_THRESHOLD = 15;
 
-@observer
 class Header extends React.Component<RouteComponentProps, THeaderState> {
   state = {
     isMenuOpen: false,
     isScrolled: false,
-    theme: isClient && localStorage.getItem('theme'),
+    theme: isClient && localStorage.getItem('theme') || '',
   };
 
   onChangeLang = () => nextLang();
@@ -66,7 +62,6 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
 
   render() {
     const { isMenuOpen, isScrolled, theme } = this.state;
-    const account = Account.getData().value;
     const themeClass = `theme-${theme}`;
 
     if (isClient) {
@@ -104,19 +99,6 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
                 type='icon-main'
                 shadow
               />
-              {/*<Button
-                className='header__profile'
-                href={account ? pagesPath.profile : pagesPath.login}
-                icon={account ? <Icons.profile /> : <Icons.enter />}
-                type='icon-main'
-                shadow
-              />
-              <Button
-                className='header__burger'
-                onClick={this.toggleMenu}
-                icon={<></>}
-                shadow
-              />*/}
             </div>
 
             <div className='header__menu'>
@@ -132,7 +114,7 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
                 onSwitch={this.onSwitchLang}
                 theme='compact'
               />
-              <Navigation signedIn={!!account} />
+              <Navigation />
             </div>
           </div>
         </Container>

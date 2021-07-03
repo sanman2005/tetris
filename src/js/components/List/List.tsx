@@ -31,8 +31,9 @@ export default (props: IListProps & ColumnProps) => {
   return (
     <>
       {title && <div className='title'>{title}</div>}
+
       <ul className={cn(className, { row: grid })}>
-        {listItems.length
+        {listItems?.length
           ? listItems.map((item, index) =>
             <li key={index} className={itemClass}>{item}</li>)
           : <Empty text={emptyText || i18n`listEmpty`} />

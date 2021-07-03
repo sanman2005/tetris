@@ -1,10 +1,11 @@
 import * as React from 'react';
-import * as ModalReact from 'react-modal';
+import ModalReact from 'react-modal';
 import cn from 'classnames';
+
+import Button from 'components/Button';
 
 import Icons from '../icons';
 import { scrollEnable, scrollDisable } from 'js/helpers';
-import Button from 'components/Button';
 
 interface IModalProps {
   children: JSX.Element;

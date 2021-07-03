@@ -5,7 +5,7 @@ import { server as apiConfig } from '../../../config/app.config.json';
 
 const { production } = apiConfig.host;
 const apiHost: string = (apiConfig.host as any)[env] || production;
-let ws: WebSocket = null;
+let ws: WebSocket | null = null;
 
 export const connect = () => {
   if (ws && ws.readyState !== ws.CLOSED) {
@@ -15,6 +15,8 @@ export const connect = () => {
   ws = new WebSocket(apiHost);
 
   window.onbeforeunload = function() {
+    if (!ws) return;
+
     ws.onclose = () => null;
     ws.close();
   };
@@ -33,7 +35,7 @@ export const connect = () => {
   };
 };
 
-export const isConnected = () => ws && ws.readyState === ws.OPEN;
+export const isConnected = () => !!ws && ws.readyState === ws.OPEN;
 
-export const send = (action: TAction, data: object = null) =>
-  isConnected() && ws.send(JSON.stringify({ action, data }));
+export const send = (action: TAction, data: object = {}) =>
+  isConnected() && ws?.send(JSON.stringify({ action, data }));

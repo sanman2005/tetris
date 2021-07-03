@@ -1,7 +1,7 @@
 import { TAction } from './actions';
 
 export type IListener = () => void;
-export type IReceiveListener = (data?: object) => void;
+export type IReceiveListener = (data?: any) => void;
 
 const listeners: {
   connect: IListener[];

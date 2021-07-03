@@ -17,11 +17,11 @@ export enum Colors {
 }
 
 export interface IShape {
-  id?: string;
+  id: string;
   cells: ICell[];
-  color?: Colors;
-  frozen?: boolean;
-  position?: IVector;
+  color: Colors;
+  frozen: boolean;
+  position: IVector;
   smile?: Smiles;
 }
 
@@ -76,7 +76,7 @@ interface IShapeProps extends IShape {
 }
 
 interface IShapeState {
-  smile: ISmile;
+  smile: ISmile | null;
 }
 
 const getSmileParams = (cells: ICell[]) => {
@@ -124,10 +124,10 @@ export default class Shape extends React.PureComponent<
   IShapeState
 > {
   state = {
-    smile: this.props.smile && {
+    smile: this.props.smile ? {
       type: this.props.smile,
       ...getSmileParams(this.props.cells),
-    },
+    } : null,
   };
 
   componentDidUpdate(prevProps: Readonly<IShapeProps>) {
@@ -152,7 +152,7 @@ export default class Shape extends React.PureComponent<
     return (
       <div
         className={cn('shape', { [`shape--${color}`]: color })}
-        onClick={onClick || null}
+        onClick={onClick}
         style={{
           width: `${cellSizeX}%`,
           height: `${cellSizeY}%`,
