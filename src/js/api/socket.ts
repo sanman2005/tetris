@@ -37,5 +37,5 @@ export const connect = () => {
 
 export const isConnected = () => !!ws && ws.readyState === ws.OPEN;
 
-export const send = (action: TAction, data: object = {}) =>
+export const send = (action: TAction, data: object | null = null) =>
   isConnected() && ws?.send(JSON.stringify({ action, data }));

@@ -196,7 +196,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     if (server) {
       this.state = newState;
-      this.sendServerState(state);
+      this.sendServerState({ data: state });
 
       callback?.();
     } else {
@@ -225,7 +225,13 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   sendControlToServer = (data: IGameControl) => send(Actions.gameUpdate, data);
 
-  sendServerState = (data: Partial<IGameState>, player?: IPlayer) => {
+  sendServerState = ({
+    data,
+    player,
+  }: {
+    data: Partial<IGameState>;
+    player?: IPlayer;
+  }) => {
     const { room } = this.props;
     const { field, gameShapes, gameOver, stats, timeShapeMove } = this.state;
     const dataToSend = data || {
@@ -236,7 +242,6 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       stats,
       timeShapeMove,
     };
-    console.log(data);
 
     if (player) {
       player.send(Actions.gameUpdate, dataToSend);
