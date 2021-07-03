@@ -147,19 +147,11 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader',
-            options: {
-              context: path.resolve(__dirname, '../'),
-              configFile: path.resolve(__dirname, './tsconfig.json'),
-            },
-          },
-          {
             loader: 'babel-loader',
             options: {
               presets: [
-                '@babel/env',
-                // '@babel/preset-env',
-                // '@babel/preset-react',
+                '@babel/preset-env',
+                '@babel/preset-react',
                 '@babel/preset-typescript',
               ],
               plugins: [
@@ -168,9 +160,13 @@ module.exports = {
               ],
             },
           },
-          // {
-          //   loader: 'source-map-loader',
-          // },
+          {
+            loader: 'ts-loader',
+            options: {
+              context: path.resolve(__dirname, '../'),
+              configFile: path.resolve(__dirname, './tsconfig.json'),
+            },
+          },
         ],
       },
       {

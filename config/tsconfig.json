@@ -5,10 +5,9 @@
     "baseUrl": "../",
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "module": "esnext",
     "moduleResolution": "node",
-    "noEmit": true,
     "noImplicitAny": true,
     "strict": true,
     "paths": {

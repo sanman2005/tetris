@@ -28,6 +28,7 @@ import {
   getPositionKey,
   pointRotate,
 } from './GameHelpers';
+import { IPlayer } from '../../server/player';
 
 const CELL_SIZE = 30;
 const SCORE_ROW_REMOVE = 10;
@@ -47,7 +48,9 @@ const TIME_SHAPE_BY_FILLED_ROWS: { [key: string]: number } = {
   27: TIME_SHAPE_MOVE_START * 0.4,
   35: TIME_SHAPE_MOVE_START * 0.3,
   44: TIME_SHAPE_MOVE_START * 0.2,
-  80: TIME_SHAPE_MOVE_START * 0.1,
+  80: TIME_SHAPE_MOVE_START * 0.17,
+  120: TIME_SHAPE_MOVE_START * 0.14,
+  150: TIME_SHAPE_MOVE_START * 0.11,
 };
 
 export interface IGame {
@@ -193,11 +196,9 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
     if (server) {
       this.state = newState;
-      this.sendServerState({ player: null, data: state });
+      this.sendServerState(state);
 
-      if (callback) {
-        callback();
-      }
+      callback?.();
     } else {
       this.setState(newState, callback);
     }
@@ -224,7 +225,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
 
   sendControlToServer = (data: IGameControl) => send(Actions.gameUpdate, data);
 
-  sendServerState = ({ player, data }: IData<Partial<IGameState>>) => {
+  sendServerState = (data: Partial<IGameState>, player?: IPlayer) => {
     const { room } = this.props;
     const { field, gameShapes, gameOver, stats, timeShapeMove } = this.state;
     const dataToSend = data || {
@@ -235,6 +236,7 @@ export default class Game extends React.Component<IGameProps, IGameState> {
       stats,
       timeShapeMove,
     };
+    console.log(data);
 
     if (player) {
       player.send(Actions.gameUpdate, dataToSend);

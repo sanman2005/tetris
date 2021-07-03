@@ -7,7 +7,7 @@ import Constants from 'js/constants';
 import Game, { IGame } from '../components/Game';
 
 export interface IData<T = object> {
-  player: IPlayer | null;
+  player: IPlayer;
   data: T;
 }
 
@@ -46,12 +46,15 @@ export const createRoom = (options: IRoomOptions) => {
     players: [],
     options,
     isClosed: false,
+
     get isFull() {
       return this.players.length === this.options.playersMax;
     },
+
     get isEmpty() {
       return !this.players.length;
     },
+
     addPlayer(player) {
       if (this.isFull) {
         throw new Error('room is full');
@@ -65,6 +68,7 @@ export const createRoom = (options: IRoomOptions) => {
       this.players.push(player);
       this.game?.playerAdd(player.id);
     },
+
     removePlayer(player) {
       const playerIndex = this.players.indexOf(player);
 
@@ -80,6 +84,7 @@ export const createRoom = (options: IRoomOptions) => {
         this.game?.end();
       }
     },
+
     start() {
       const onInit = (game: IGame) => {
         this.game = game;
